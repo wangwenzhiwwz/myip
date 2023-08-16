@@ -123,17 +123,17 @@ let HTTP = {
         let timeout = setTimeout(() => {
             img.onerror = img.onload = null;
             img.src = '';
-            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-error">连接超时</span>'
+            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-error">Timeout</span>'
         }, 6000);
 
         img.onerror = () => {
             clearTimeout(timeout);
-            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-error">无法访问</span>'
+            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-error">Failed</span>'
         }
 
         img.onload = () => {
             clearTimeout(timeout);
-            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-success">连接正常</span>'
+            $$.getElementById(cbElID).innerHTML = '<span class="sk-text-success">Connected</span>'
         }
 
         img.src = `https://${domain}/favicon.ico?${+(new Date)}`
