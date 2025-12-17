@@ -1,658 +1,176 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>IP 地址查询工具</title>
+<link rel="preconnect" href="https://api.ipify.org">
+<link rel="preconnect" href="https://ipwho.is">
+<link rel="preconnect" href="https://ipapi.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://dns.google">
 <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <link rel="apple-touch-icon" sizes="180x180" href="https://wangwenzhi.eu.org/images/favicon_io/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-16x16.png">
 <link rel="manifest" href="https://wangwenzhi.eu.org/images/favicon_io/site.webmanifest">
 <style>
-/* -------- 基础变量与暗黑模式支持 -------- */
-:root {
-  --bg-color: #fff;
-  --text-color: #111;
-  --secondary-text: #333;
-  --tertiary-text: #888;
-  --border-color: #eee;
-  --light-border: #f0f0f0;
-  --card-bg: #fafafa;
-  --input-bg: #fff;
-  --input-border: #e0e1e6;
-  --button-bg: #111;
-  --button-text: #fff;
-  --refresh-bg: #fff;
-  --refresh-text: #111;
-  --error-color: #e00;
-  --shadow: 0 1px 8px #eee;
-  --radius: 16px;
-  --small-radius: 10px;
-  --spacing-unit: 8px;
+:root{
+--bg:#fff;--text:#111;--secondary:#333;--tertiary:#888;--border:#eee;--light-border:#f0f0f0;--card:#fafafa;--shadow:0 1px 8px #eee;--radius:16px;--unit:8px;--skeleton-base:#ebebeb;--skeleton-shine:#f5f5f5
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #1a1a1a;
-    --text-color: #f0f0f0;
-    --secondary-text: #ccc;
-    --tertiary-text: #888;
-    --border-color: #333;
-    --light-border: #2a2a2a;
-    --card-bg: #2a2a2a;
-    --input-bg: #333;
-    --input-border: #444;
-    --button-bg: #444;
-    --button-text: #fff;
-    --refresh-bg: #333;
-    --refresh-text: #ddd;
-    --error-color: #ff4444;
-    --shadow: 0 1px 8px rgba(0,0,0,0.3);
-  }
+@media (prefers-color-scheme:dark){
+:root{--bg:#1a1a1a;--text:#f0f0f0;--secondary:#ccc;--tertiary:#888;--border:#333;--light-border:#2a2a2a;--card:#2a2a2a;--shadow:0 1px 8px rgba(0,0,0,.3);--skeleton-base:#2c2c2c;--skeleton-shine:#383838}
+.flag-img{filter:brightness(.9)saturate(1.2)}
 }
-
-/* -------- 基础与排版 -------- */
-html,body{
-  height:100%;
-  margin:0;
-  padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  background:var(--bg-color);
-  color:var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
-}
-body{
-  min-height:100vh;
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  padding: 2vw;
-  box-sizing: border-box;
-}
-
-/* 主标题区 – 顶部留白自适应 */
-.main-top{
-  width:100%;
-  max-width:680px;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  padding-top:0;
-  gap: calc(var(--spacing-unit) * 2);
-  margin-top: 12vh;
-}
-
-/* IP 主卡片 */
-.ip-main-card{
-  width:100%;
-  display:flex;
-  flex-direction:row;
-  align-items:center;
-  gap: calc(var(--spacing-unit) * 1.5);
-  justify-content:center;
-  padding: calc(var(--spacing-unit) * 2) 0;
-}
-.flag-img{
-  width: clamp(48px, 12vw, 60px);
-  height: clamp(32px, 8vw, 40px);
-  border-radius: 8px;
-  background:var(--bg-color);
-  display:none;
-  object-fit:cover;
-  box-shadow:var(--shadow);
-}
-.ip-main-info{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap: calc(var(--spacing-unit));
-}
-.ip-big-value{
-  font-size: clamp(2rem, 8vw, 3.2rem);
-  font-weight:700;
-  color:var(--text-color);
-  word-break:break-all;
-  line-height:1.2;
-  text-align:center;
-}
-.ip-place{
-  font-size: clamp(1rem, 4vw, 1.3rem);
-  color:var(--secondary-text);
-  line-height:1.5;
-  min-height:1.5em;
-  text-align:center;
-}
-
-/* 详细信息卡片 */
-.detail-card{
-  width:100%;
-  background:var(--card-bg);
-  border-radius:var(--radius);
-  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5);
-  display:flex;
-  flex-direction:column;
-  gap: calc(var(--spacing-unit));
-  box-shadow:var(--shadow);
-  box-sizing: border-box;
-}
-.detail-title{
-  font-size: clamp(1.1rem, 3.5vw, 1.3rem);
-  font-weight:700;
-  color:var(--secondary-text);
-  padding-bottom: calc(var(--spacing-unit) * 0.5);
-  margin-bottom: calc(var(--spacing-unit) * 0.75);
-  border-bottom:1px solid var(--border-color);
-  letter-spacing:1px;
-}
-.detail-row{
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr;
-  gap: calc(var(--spacing-unit) * 0.75);
-}
-.detail-cell{
-  display:grid;
-  grid-template-columns:1fr 2fr;
-  gap: calc(var(--spacing-unit) * 0.5);
-  align-items:center;
-  min-width:0;
-  padding: calc(var(--spacing-unit) * 0.5) 0;
-  border-bottom:1px solid var(--light-border);
-}
-.detail-label{
-  font-size: clamp(0.9rem, 3vw, 1.05rem);
-  color:var(--tertiary-text);
-  font-weight:500;
-  letter-spacing:.5px;
-}
-.detail-value{
-  font-size: clamp(0.9rem, 3vw, 1.05rem);
-  color:var(--text-color);
-  word-break:break-all;
-}
-.ipv6-value{
-  color:var(--text-color);
-}
-
-/* 操作行 */
-.op-row{
-  width:100%;
-  display:flex;
-  gap: calc(var(--spacing-unit));
-  margin-top: calc(var(--spacing-unit) * 0.5);
-}
-.ip-input-slim{
-  flex:1;
-  font-size: clamp(0.9rem, 3vw, 1.1rem);
-  padding: calc(var(--spacing-unit)) calc(var(--spacing-unit) * 1.25);
-  border:1px solid var(--input-border);
-  border-radius:var(--small-radius);
-  background:var(--input-bg);
-  color:var(--text-color);
-  outline:none;
-  box-sizing:border-box;
-  transition:border-color .19s, box-shadow .19s;
-}
-.ip-input-slim:focus{
-  border-color:var(--text-color);
-  box-shadow:0 0 0 1px rgba(255,255,255,0.1) in dark;
-}
-.btn-slim{
-  padding: calc(var(--spacing-unit)) 0;
-  background:var(--button-bg);
-  color:var(--button-text);
-  border:none;
-  border-radius:var(--small-radius);
-  font-weight:700;
-  font-size: clamp(0.9rem, 3vw, 1.1rem);
-  cursor:pointer;
-  min-width: clamp(80px, 25vw, 90px);
-  transition:background .19s, transform .1s;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: calc(var(--spacing-unit) * 0.25);
-}
-.btn-slim:active{
-  transform: scale(0.98);
-}
-.btn-slim:focus{
-  background:var(--button-bg);
-}
-.btn-slim:disabled{
-  background:var(--input-border);
-  color:var(--tertiary-text);
-  cursor:not-allowed;
-}
-.btn-refresh{
-  background:var(--refresh-bg);
-  color:var(--refresh-text);
-  border:1px solid var(--border-color);
-}
-.btn-refresh:active,.btn-refresh:focus{
-  background:var(--input-bg);
-  color:var(--text-color);
-}
-
-/* 状态文本 */
-.status-text{
-  width:100%;
-  text-align:center;
-  font-size: clamp(0.9rem, 3vw, 1.05rem);
-  color:var(--tertiary-text);
-  min-height:1.7em;
-  margin-top: calc(var(--spacing-unit) * 1.25);
-  letter-spacing:.1px;
-}
-.status-text.ok{
-  color:var(--text-color);
-}
-.status-text.err{
-  color:var(--error-color);
-}
-.status-text.loading{
-  color:var(--text-color);
-}
-
-/* 访问计数器样式 – 与 status-text 相同 */
-#visitCount{
-  margin-top: calc(var(--spacing-unit) * 0.75);
-}
-
-/* 模式切换按钮 */
-.mode-toggle {
-  position: fixed;
-  top: 2vw;
-  right: 2vw;
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 50%;
-  width: clamp(40px, 10vw, 50px);
-  height: clamp(40px, 10vw, 50px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: all 0.3s;
-  z-index: 100;
-}
-
-.mode-toggle i {
-  font-size: clamp(1.2rem, 4vw, 1.5rem);
-  color: var(--text-color);
-}
-
-/* 移动端优化 */
-@media (max-width:680px){
-  .main-top{
-    margin-top: 10vh;
-  }
-  .detail-cell{
-    grid-template-columns: 1fr 1.5fr;
-  }
-  .op-row{
-    flex-wrap: wrap;
-  }
-  .btn-slim{
-    flex: 1;
-    min-width: auto;
-  }
-}
-
-/* 超小屏幕优化 */
-@media (max-width:360px){
-  .detail-cell{
-    grid-template-columns: 1fr;
-  }
-  .detail-label{
-    margin-bottom: 2px;
-  }
-}
+html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2vw;box-sizing:border-box}
+.main{max-width:680px;width:100%;margin:12vh auto 0;display:flex;flex-direction:column;align-items:center;gap:calc(var(--unit)*2)}
+.ip-card{display:flex;align-items:center;justify-content:center;gap:calc(var(--unit)*3);padding:calc(var(--unit)*2) 0;min-height:110px;width:100%}
+.flag-skeleton{width:clamp(72px,15vw,90px);height:clamp(54px,11.25vw,67.5px);background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:10px;box-shadow:var(--shadow);flex-shrink:0}
+@keyframes s{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.flag-img{width:clamp(72px,15vw,90px);aspect-ratio:4/3;border-radius:10px;box-shadow:var(--shadow);object-fit:cover;display:none;opacity:0;transition:opacity .4s}
+.flag-img.loaded{display:block;opacity:1}
+.info{display:flex;flex-direction:column;align-items:center;gap:10px}
+#ipAddr{font-size:clamp(2rem,8vw,3.2rem);font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;word-break:break-all}
+#ipAddr:hover{opacity:.8}
+#ipPlace{font-size:clamp(1rem,4vw,1.3rem);color:var(--secondary);text-align:center;min-height:1.5em}
+.skeleton{background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:8px}
+.ip-big-value.skeleton{height:clamp(2rem,8vw,3.2rem);width:220px}
+.ip-place.skeleton{height:1.5em;width:180px}
+.detail-value.skeleton{height:1.2em;width:70%}
+.card{background:var(--card);border-radius:var(--radius);padding:calc(var(--unit)*2) calc(var(--unit)*1.5);box-shadow:var(--shadow);width:100%;box-sizing:border-box}
+.title{font-size:clamp(1.1rem,3.5vw,1.3rem);font-weight:700;color:var(--secondary);padding-bottom:calc(var(--unit)*.5);margin-bottom:calc(var(--unit)*.75);border-bottom:1px solid var(--border);letter-spacing:1px}
+.row{display:grid;gap:calc(var(--unit)*.75)}
+.cell{display:grid;grid-template-columns:1fr 2fr;gap:calc(var(--unit)*.5);align-items:center;padding:calc(var(--unit)*.5) 0;border-bottom:1px solid var(--light-border)}
+.label{font-size:clamp(.9rem,3vw,1.05rem);color:var(--tertiary);font-weight:500;letter-spacing:.5px}
+.value{font-size:clamp(.9rem,3vw,1.05rem);color:var(--text);word-break:break-all}
+.coords-link{color:var(--text);text-decoration:none;cursor:pointer;transition:opacity .2s}
+.coords-link:hover{opacity:.8}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,128,0,.9);color:#fff;padding:12px 24px;border-radius:30px;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s,transform .3s;z-index:1000;display:flex;align-items:center;gap:8px}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(-10px)}
+@media (max-width:680px){.main{margin-top:10vh}.cell{grid-template-columns:1fr 1.5fr}}
+@media (max-width:360px){.cell{grid-template-columns:1fr}.label{margin-bottom:2px}}
 </style>
 </head>
 <body>
-<!-- 模式切换按钮 -->
-<div id="modeToggle" class="mode-toggle">
-  <i class="fa fa-moon-o" aria-hidden="true"></i>
-</div>
+<div class="main">
+  <div class="ip-card">
+    <div id="flagSkeleton" class="flag-skeleton"></div>
+    <img id="ip-flag" class="flag-img" alt="国旗"/>
+    <div class="info">
+      <div id="ipAddr" class="ip-big-value skeleton"></div>
+      <div id="ipPlace" class="ip-place skeleton"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="title">详细网络信息</div>
+    <div class="row">
+      <div class="cell"><div class="label">IPv6 地址</div><div id="ipv6" class="value"></div></div>
+      <div class="cell"><div class="label">主机名</div><div id="hostname" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">国家</div><div id="country" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">自治系统（ASN）</div><div id="asn" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">运营商/组织</div><div id="org" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">大洲</div><div id="continent" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">坐标</div><div id="coords" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">邮编</div><div id="postal" class="value skeleton"></div></div>
+    </div>
+  </div>
 
-<div class="main-top">
-  <div class="ip-main-card">
-    <img id="ip-flag" class="flag-img" alt="国旗" />
-    <div class="ip-main-info">
-      <div id="ipAddr" class="ip-big-value"></div>
-      <div id="ipPlace" class="ip-place"></div>
+  <!-- 客户端信息（不显示完整 User Agent） -->
+  <div class="card">
+    <div class="title">客户端信息</div>
+    <div class="row">
+      <div class="cell"><div class="label">浏览器</div><div id="browser" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">浏览器版本</div><div id="browserVersion" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">操作系统</div><div id="os" class="value skeleton"></div></div>
+      <div class="cell"><div class="label">设备类型</div><div id="deviceType" class="value skeleton"></div></div>
     </div>
   </div>
-  <div class="detail-card">
-    <div class="detail-title">详细网络信息</div>
-    <div class="detail-row">
-      <!-- IPv6 -->
-      <div class="detail-cell"><div class="detail-label">IPv6 地址</div><div id="ipv6" class="detail-value ipv6-value"></div></div>
-      <!-- 主机名 -->
-      <div class="detail-cell"><div class="detail-label">主机名</div><div id="hostname" class="detail-value"></div></div>
-      <!-- ASN -->
-      <div class="detail-cell"><div class="detail-label">自治系统（ASN）</div><div id="asn" class="detail-value"></div></div>
-      <!-- ISP/运营商 -->
-      <div class="detail-cell"><div class="detail-label">运营商/组织</div><div id="org" class="detail-value"></div></div>
-      <!-- 大洲 -->
-      <div class="detail-cell"><div class="detail-label">大洲</div><div id="continent" class="detail-value"></div></div>
-      <!-- 纬度 -->
-      <div class="detail-cell"><div class="detail-label">纬度</div><div id="lat" class="detail-value"></div></div>
-      <!-- 经度 -->
-      <div class="detail-cell"><div class="detail-label">经度</div><div id="lon" class="detail-value"></div></div>
-      <!-- 邮编 -->
-      <div class="detail-cell"><div class="detail-label">邮编</div><div id="postal" class="detail-value"></div></div>
-    </div>
-  </div>
-  <div class="op-row">
-    <input id="manualIp" class="ip-input-slim" type="text" placeholder="输入IP地址查询（留空查本机）">
-    <button id="btnQuery" class="btn-slim"><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
-    <button id="btnRefresh" class="btn-slim btn-refresh"><i class="fa fa-refresh" aria-hidden="true"></i> 刷新</button>
-  </div>
-  <div id="status" class="status-text loading"></div>
-  <!-- 访问计数器 -->
-  <div id="visitCount" class="status-text"></div>
 </div>
+<div id="toast" class="toast"><i class="fa fa-check"></i> 已复制 IP 地址！</div>
+
 <script>
-const TIMEOUT=8000;
-const ipAddrEl=document.getElementById('ipAddr');
-const ipPlaceEl=document.getElementById('ipPlace');
-const ipv6El=document.getElementById('ipv6');
-const hostnameEl=document.getElementById('hostname');
-const asnEl=document.getElementById('asn');
-const orgEl=document.getElementById('org');
-const continentEl=document.getElementById('continent');
-const latEl=document.getElementById('lat');
-const lonEl=document.getElementById('lon');
-const postalEl=document.getElementById('postal');
-const statusEl=document.getElementById('status');
-const flagEl=document.getElementById('ip-flag');
-const manualIpInput=document.getElementById('manualIp');
-const btnQuery=document.getElementById('btnQuery');
-const btnRefresh=document.getElementById('btnRefresh');
-const modeToggle=document.getElementById('modeToggle');
-const modeIcon=modeToggle.querySelector('i');
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),browser:document.getElementById('browser'),browserVersion:document.getElementById('browserVersion'),os:document.getElementById('os'),deviceType:document.getElementById('deviceType'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast')};
 let lastIpv6='';
-let isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-/* 暗黑模式切换 */
-function toggleDarkMode() {
-  isDarkMode = !isDarkMode;
-  
-  if (isDarkMode) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    modeIcon.classList.remove('fa-moon-o');
-    modeIcon.classList.add('fa-sun-o');
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    modeIcon.classList.remove('fa-sun-o');
-    modeIcon.classList.add('fa-moon-o');
-  }
-  
-  localStorage.setItem('darkMode', isDarkMode ? 'true' : 'false');
+function toast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
+els.ipAddr.onclick=async()=>{const ip=els.ipAddr.textContent.trim();if(ip&&ip!=='未知'){try{await navigator.clipboard.writeText(ip);toast()}catch{alert('复制失败')}}}
+
+function rmSk(el){el.classList.remove('skeleton')}
+function showFlag(){els.flagSk.style.display='none';els.flag.style.display='block';els.flag.classList.add('loaded')}
+
+async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
+async function getIPs(){const [v4,v6]=await Promise.allSettled([fetchT('https://api.ipify.org?format=json'),fetchT('https://api64.ipify.org?format=json')]);const ipv4=v4.status==='fulfilled'?v4.value.ip||v4.value.text||'未知':'未知';const ipv6=v6.status==='fulfilled'?v6.value.ip||v6.value.text||'':'未检测到';if(ipv6&&ipv6!==ipv4)lastIpv6=ipv6;return{ipv4,ipv6:ipv6||lastIpv6||'未检测到'}}
+async function getGeo(ip){const apis=[`https://ipwho.is/${ip?encodeURIComponent(ip):''}`,`https://ipapi.co/${ip?encodeURIComponent(ip)+'/':''}json/`,'https://ipinfo.io/json'];for(const u of apis){try{const d=await fetchT(u);if(d&&(d.ip||d.query||d.loc))return d}catch{}}return null}
+
+// 简单解析 User Agent（纯 JS，无依赖）
+function parseUA(ua){
+  const isMobile = /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune/.test(ua);
+  const isTablet = /iPad|Android(?!.*Mobile)|Tablet|Silk/.test(ua);
+  let deviceType = 'PC';
+  if(isMobile) deviceType = '手机';
+  if(isTablet) deviceType = '平板';
+
+  let browser = '未知';
+  let version = '未知';
+  if(/Edg/.test(ua)){browser='Edge';version=ua.match(/Edg\/([\d.]+)/)?.[1]||'未知'}
+  else if(/Chrome/.test(ua)){browser='Chrome';version=ua.match(/Chrome\/([\d.]+)/)?.[1]||'未知'}
+  else if(/Safari/.test(ua)){browser='Safari';version=ua.match(/Version\/([\d.]+)/)?.[1]||'未知'}
+  else if(/Firefox/.test(ua)){browser='Firefox';version=ua.match(/Firefox\/([\d.]+)/)?.[1]||'未知'}
+  else if(/Opera|OPR/.test(ua)){browser='Opera';version=ua.match(/(Opera|OPR)\/([\d.]+)/)?.[2]||'未知'}
+
+  let os = '未知';
+  if(/Windows NT/.test(ua)){os='Windows'}
+  else if(/Mac OS X/.test(ua)){os='macOS'}
+  else if(/Linux/.test(ua)){os='Linux'}
+  else if(/Android/.test(ua)){os='Android'}
+  else if(/iPhone|iPad|iPod/.test(ua)){os='iOS'}
+
+  return {browser,version,os,deviceType};
 }
 
-// 初始化暗黑模式状态
-function initDarkMode() {
-  const savedMode = localStorage.getItem('darkMode');
-  if (savedMode !== null) {
-    isDarkMode = savedMode === 'true';
-  } else {
-    isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
-  
-  if (isDarkMode) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    modeIcon.classList.remove('fa-moon-o');
-    modeIcon.classList.add('fa-sun-o');
-  }
-  
-  // 监听系统主题变化
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (localStorage.getItem('darkMode') === null) { // 只有在未手动设置过时才跟随系统
-      isDarkMode = e.matches;
-      if (isDarkMode) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        modeIcon.classList.remove('fa-moon-o');
-        modeIcon.classList.add('fa-sun-o');
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        modeIcon.classList.remove('fa-sun-o');
-        modeIcon.classList.add('fa-moon-o');
-      }
-    }
-  });
-}
-
-/* ---------- 通用 fetch ---------- */
-async function fetchWithTimeout(url, timeout=TIMEOUT){
-  const controller=new AbortController();
-  const id=setTimeout(()=>controller.abort(), timeout);
-  try{
-    const rs=await fetch(url,{signal:controller.signal});
-    if(!rs.ok) throw new Error(`HTTP 错误: ${rs.status}`);
-    const ct=rs.headers.get('content-type')||'';
-    if(ct.includes('application/json')||ct.includes('text/plain')) return await rs.json();
-    return {text:await rs.text()};
-  }finally{
-    clearTimeout(id);
-  }
-}
-
-/* ---------- 反向 DNS (PTR) 查询 ---------- */
-async function fetchHostname(ip){
-  if(!ip) return '未检测到';
-  const rev = ip.split('.').reverse().join('.') + '.in-addr.arpa';
-  try{
-    const r = await fetch(`https://dns.google/resolve?name=${rev}&type=PTR`);
-    const data = await r.json();
-    const host = data?.Answer?.[0]?.data?.replace(/\.$/, '');
-    return host || '未检测到';
-  }catch(_){
-    return '未检测到';
-  }
-}
-
-/* ---------- 主体逻辑：查询地理信息 ---------- */
-async function fetchGeoInfo(ip=''){
-  updateStatus('正在查询地理信息…','loading');
-  try{
-    const url = ip ? `https://ipwho.is/${encodeURIComponent(ip)}` : 'https://ipwho.is/?format=json';
-    const data = await fetchWithTimeout(url);
-    if(data && (data.success===true||data.success===undefined)){
-      renderGeo(data);
-      updateStatus('', 'ok');
-      return;
-    }
-    throw new Error('ipwho.is 返回无效');
-  }catch(e){
-    // 失败后尝试第二个服务
-    try{
-      const url = ip ? `https://ipapi.co/${encodeURIComponent(ip)}/json/` : 'https://ipapi.co/json/';
-      const data = await fetchWithTimeout(url);
-      renderGeo(data);
-      updateStatus('', 'ok');
-    }catch(e){
-      updateStatus('地理信息查询失败，请稍后重试', 'err');
-      resetLoading(false);
-    }
-  }
-}
-
-/* ---------- 解析并渲染 Geo 数据 ---------- */
-function renderGeo(data){
-  // 国旗
-  let code='';
-  if(data.country_code && /^[A-Za-z]{2}$/.test(data.country_code)) code=data.country_code.toLowerCase();
-  else if(data.country && /^[A-Za-z]{2}$/.test(data.country)) code=data.country.toLowerCase();
-  if(code){
-    flagEl.src=`https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/flags/4x3/${code}.svg`;
-    flagEl.style.display='block';
-  }else flagEl.style.display='none';
-
-  // IP & 地区
-  const ipVal = data.ip||data.query||data.address||'未知IP';
-  ipAddrEl.textContent=ipVal;
-  const place = (data.country_name||data.country||'') 
-                + (data.city?' '+data.city:'' )
-                + (data.region_name||data.region?' · '+(data.region_name||data.region):'');
-  ipPlaceEl.textContent=place;
-
-  // IPv6
-  if(data.ipv6||(data.connection&&data.connection.ipv6)){
-    lastIpv6=data.ipv6||data.connection.ipv6;
-    ipv6El.textContent=lastIpv6;
-  }else ipv6El.textContent=lastIpv6?lastIpv6:'未检测到';
-
-  // 主机名（反向 DNS）
-  hostnameEl.textContent='';
-  fetchHostname(data.ip||data.query||'').then(host=>{ hostnameEl.textContent=host; });
-
-  // ASN
-  asnEl.textContent=(data.connection?.asn)||data.asn||'未知';
-
-  // ISP/运营商
-  orgEl.textContent=data.org||data.connection?.isp||data.isp||'未知';
-
-  // 大洲
-  continentEl.textContent=data.continent_name||data.continent||'未知';
-
-  // 纬度
-  latEl.textContent=data.latitude||'未知';
-
-  // 经度
-  lonEl.textContent=data.longitude||'未知';
-
-  // 邮编
-  postalEl.textContent=data.postal||data.postal_code||'未知';
-}
-
-/* ---------- 本机 IP 检测 ---------- */
-async function getLocalIP(){
-  resetLoading(true);
-  updateStatus('正在获取本机 IP 地址…','loading');
-  let ip='',ipv6='';
-  try{
-    const r=await fetchWithTimeout('https://api.ipify.org?format=json');
-    ip=r.ip||r.text||'';
-    ipAddrEl.textContent=ip;
-  }catch(e){
-    ipAddrEl.textContent='无法获取 IPv4 地址';
-  }
-  try{
-    const r=await fetchWithTimeout('https://api64.ipify.org?format=json');
-    ipv6=r.ip||r.text||'';
-    if(ipv6&&ipv6!==ip){
-      lastIpv6=ipv6;
-      ipv6El.textContent=ipv6;
-    }else ipv6El.textContent='未检测到';
-  }catch(e){
-    ipv6El.textContent=lastIpv6?lastIpv6:'未检测到';
-  }
-  if(ip&& !ip.startsWith('无法')){
-    await fetchGeoInfo(ip);
-  }else if(lastIpv6&& !lastIpv6.startsWith('未检测')){
-    await fetchGeoInfo(lastIpv6);
+function render(ip,geo){
+  rmSk(els.ipAddr);
+  if(!geo){rmSk(els.ipPlace);els.ipPlace.textContent='未知地区';els.flagSk.style.display='none';return}
+  const place=(geo.country_name||geo.country||'')+(geo.city?' '+geo.city:'')+(geo.region_name||geo.region?' · '+(geo.region_name||geo.region):'');
+  els.ipPlace.textContent=place||'未知地区';rmSk(els.ipPlace);
+  let code=(geo.country_code||geo.country||'').toLowerCase();if(code.length===2){els.flag.src=`https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/flags/4x3/${code}.svg`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
+  [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal].forEach(rmSk);
+  els.ipv6.textContent=geo.ipv6||lastIpv6||'未检测到';
+  els.country.textContent=geo.country_name||geo.country||'未知';
+  const asnNum=geo.connection?.asn||geo.asn||'';
+  els.asn.textContent=asnNum?'AS'+asnNum:'未知';
+  els.org.textContent=geo.org||geo.connection?.isp||geo.isp||'未知';
+  els.continent.textContent=geo.continent_name||geo.continent||'未知';
+  const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
+  if(lat&&lon){
+    els.coords.innerHTML=`<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="coords-link">${lat}, ${lon}</a>`;
   }else{
-    updateStatus('未检测到可用公网 IP，无法查询地理信息', 'err');
-    resetLoading(false);
+    els.coords.textContent='未知';
   }
+  els.postal.textContent=geo.postal||geo.postal_code||'未知';
+  fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h||'未检测到');
+
+  // 客户端信息（不显示完整 User Agent）
+  const uaInfo = parseUA(navigator.userAgent);
+  [els.browser,els.browserVersion,els.os,els.deviceType].forEach(rmSk);
+  els.browser.textContent = uaInfo.browser;
+  els.browserVersion.textContent = uaInfo.version;
+  els.os.textContent = uaInfo.os;
+  els.deviceType.textContent = uaInfo.deviceType;
 }
 
-/* ---------- 手动查询 ---------- */
-async function handleManualQuery(){
-  const target=manualIpInput.value.trim();
-  if(!target){
-    updateStatus('请输入 IP 地址，留空查本机','default');
-    return;
-  }
-  setBtnDisabled(true);
-  resetLoading(true);
-  updateStatus('正在查询 IP: '+target+' 的信息…','loading');
-  try{
-    ipAddrEl.textContent=target;
-    ipPlaceEl.textContent='';
-    await fetchGeoInfo(target);
-  }finally{
-    setBtnDisabled(false);
-  }
+async function fetchHostname(ip){if(!ip)return'未检测到';try{const r=await fetch(`https://dns.google/resolve?name=${ip.split('.').reverse().join('.')}.in-addr.arpa&type=PTR`);const d=await r.json();return d.Answer?.[0]?.data?.replace(/\.$/,'')||'未检测到'}catch{return'未检测到'}}
+
+async function start(){
+  const {ipv4,ipv6}=await getIPs();
+  const primary=ipv4!=='未知'?ipv4:(ipv6.includes('未检测到')?'未知':ipv6);
+  els.ipAddr.textContent=primary;rmSk(els.ipAddr);els.ipv6.textContent=ipv6;
+  if(primary==='未知'){els.flagSk.style.display='none';return}
+  const geo=await getGeo(primary);
+  render(primary,geo);
 }
-
-/* ---------- UI 辅助函数 ---------- */
-function updateStatus(msg,type='default'){
-  statusEl.textContent=msg;
-  statusEl.className=`status-text ${type}`;
-}
-function resetLoading(isLoading){
-  // 只清空文本内容，不再显示动画
-  const elList=[ipAddrEl,ipPlaceEl,ipv6El,hostnameEl,asnEl,orgEl,continentEl,latEl,lonEl,postalEl];
-  elList.forEach(el=>{el.textContent='';});
-}
-function setBtnDisabled(dis){
-  btnQuery.disabled=btnRefresh.disabled=dis;
-  btnQuery.innerHTML=dis?
-    `<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 查询中`:
-    `<i class="fa fa-search" aria-hidden="true"></i> 查询`;
-  btnRefresh.innerHTML=dis?
-    `<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 刷新中`:
-    `<i class="fa fa-refresh" aria-hidden="true"></i> 刷新`;
-}
-
-/* ---------- 访问计数器 ---------- */
-async function updateVisitorCount(){
-  const countEl=document.getElementById('visitCount');
-  const namespace = encodeURIComponent(location.hostname || 'localhost');
-  const key = 'visits';
-  const counterUrl = `https://api.counterapi.org/api/${namespace}/${key}`;
-
-  try{
-    // POST 触发计数 +1，并获取最新值
-    const resp = await fetch(counterUrl, {method:'POST'});
-    const data = await resp.json();
-    const val = data?.value ?? null;
-    if(val!==null){
-      countEl.textContent=`本页面已被 ${val} 位访客访问`;
-      return;
-    }
-  }catch(e){
-    // 发生错误时使用本地计数器
-  }
-
-  // 本地备胎（localStorage）
-  const localKey = `visitorCount_${namespace}`;
-  let localVal = parseInt(localStorage.getItem(localKey) || '0', 10);
-  localVal += 1;
-  localStorage.setItem(localKey, localVal);
-  countEl.textContent=`（本地计数）本页面已被 ${localVal} 位访客访问`;
-}
-
-/* ---------- 事件绑定 & 初始加载 ---------- */
-btnQuery.addEventListener('click',handleManualQuery);
-btnRefresh.addEventListener('click',async()=>{
-  setBtnDisabled(true);
-  await getLocalIP();
-  setBtnDisabled(false);
-});
-modeToggle.addEventListener('click', toggleDarkMode);
-
-// 移动端输入框回车触发查询
-manualIpInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    handleManualQuery();
-  }
-});
-
-window.addEventListener('DOMContentLoaded',async()=>{
-  initDarkMode(); // 初始化暗黑模式
-  await getLocalIP();   // 首先获取本机 IP
-  await updateVisitorCount(); // 再更新访客计数
-});
+window.onload=()=>start();
 </script>
 </body>
 </html>
