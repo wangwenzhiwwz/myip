@@ -1,81 +1,37 @@
 # IP 地址查询工具
 
-A lightweight, self‑contained web app that lets you instantly
-discover the geographic and network information of any public IP
-address (or your own machine).  
-It uses public APIs such as **ipwho.is** and **ipapi.co** for data
-lookup and also performs a reverse‑DNS lookup to show the hostname.
+一个简洁、美观、响应式的单页 IP 查询工具，无需任何后端，支持暗黑模式、骨架屏加载动画、点击复制 IP、一键跳转 Google 地图定位等功能。
 
-> **Live demo** – [https://your‑domain.com/ip‑lookup](https://your‑domain.com/ip-lookup)  
-> *(Replace with the URL where you host the `index.html` file)*
+在线访问：（请替换为你的实际部署地址，例如：https://your-domain.com）
 
----
+## 特性
 
-## Features
+- **实时显示公网 IP**（优先 IPv4，有 IPv6 时同时显示）
+- **地理位置信息**：国家、城市、地区、大洲、坐标、邮编
+- **国旗图标** 显示对应国家
+- **网络信息**：主机名、ASN、运营商/组织
+- **客户端信息**：浏览器、版本、操作系统、设备类型（PC / 手机 / 平板）
+- **坐标可点击**：直接跳转 Google 地图查看定位城市
+- **点击 IP 自动复制** + 优雅 Toast 提示
+- **柔和骨架屏动画**，加载体验极佳
+- **完美支持暗黑模式**（跟随系统）
+- **完全前端实现**，零依赖后端，部署只需一个 HTML 文件
+- **移动端友好**，自适应所有屏幕尺寸
 
-| Feature | Description |
-|---------|-------------|
-| **IP lookup** | Query an arbitrary IP or the IP of the client by leaving the field empty. |
-| **Geolocation** | Country, city, region, continent, latitude, longitude, timezone. |
-| **Network details** | IPv6 address, autonomous system number (ASN), ISP / organization. |
-| **Hostname** | Reverse‑DNS lookup to display the FQDN. |
-| **Currency** | Local currency symbol returned where available. |
-| **Country flag** | Dynamic country flag fetched from Flag‑Icon‑CSS. |
-| **Responsive** | Works on desktop and mobile (≤ 680 px). |
-| **No JavaScript dependencies** | Only plain vanilla JS + a single Font‑Awesome CDN import. |
-| **Lightweight** | < 30 KB gzipped, no external build tools. |
+## 技术栈
 
----
+- 纯 HTML + CSS + JavaScript
+- 使用免费公共 API：
+  - ipify.org（获取 IP）
+  - ipwho.is / ipapi.co / ipinfo.io（地理位置）
+  - Google DNS（反向解析主机名）
+- 无需 API Key，无需注册
 
-## Demo
+## 使用方法
 
-![Screenshot of the IP lookup page](./screenshot.png)
+1. 将以下代码保存为 `index.html`
+2. 用任意静态服务器托管，或直接用浏览器打开
+3. 即可使用！
 
-*The screenshot shows the UI with an example lookup for `8.8.8.8`.*
-
----
-
-## Installation / Hosting
-
-1. Clone or download the repo.  
-2. Place the `index.html` file in your web‑root (e.g. `/var/www/html/`).  
-3. (Optional) Rename `index.html` to `ip-lookup.html` or similar.  
-4. Open the page in a browser:  
-   `http://your‑server.com/index.html`
-
-The app is **completely client‑side**, so any static hosting service
-( GitHub Pages, Netlify, Vercel, etc.) works out of the box.
-
----
-
-## Usage
-
-| Input | Action |
-|-------|--------|
-| **Leave the field empty** | Retrieves the IP & network information of the current machine (both IPv4 & IPv6). |
-| **Enter an IP address** | Queries the provided address. |
-| **Refresh button** | Re‑fetches the current machine’s IP and all its properties. |
-| **Query button** | Sends a lookup request for the typed address. |
-
-All interactions are performed via AJAX using the public APIs mentioned
-in the **API Usage** section below.
-
----
-
-## API Usage
-
-The app talks to two services:
-
-| Service | URL | Fallback | Notes |
-|---------|-----|----------|-------|
-| **ipwho.is** | `https://ipwho.is/<IP>` or `https://ipwho.is/?format=json` | Returns: `country`, `city`, `region`, `continent`, `latitude`, `longitude`, `timezone`, `asn`, `isp`, `hostname`, `currency`, etc. | First try. If unavailable, fallback to ipapi.co. |
-| **ipapi.co** | `https://ipapi.co/<IP>/json/` or `https://ipapi.co/json/` | Returns a subset of the above. | Light weight alternative. |
-| **Google DNS‑Over‑HTTPS (PTR)** | `https://dns.google/resolve?name=<reverse>.in-addr.arpa&type=PTR` | Follows reverse‑DNS spec. | Used to resolve hostnames. |
-
-No API key is needed – the services allow a generous rate‑limit for
-personal use.
-
----
-
-## File Structure
-
+```html
+<!-- 这里粘贴完整的代码（即上面提供的最终版本 HTML） -->
