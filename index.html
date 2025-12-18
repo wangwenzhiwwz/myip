@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>IP 地址查询工具</title>
+<title>IP Address Lookup Tool</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
 <link rel="preconnect" href="https://ipapi.co">
@@ -46,9 +46,12 @@ body{min-height:100vh;display:flex;flex-direction:column;align-items:center;just
 .value{font-size:clamp(.9rem,3vw,1.05rem);color:var(--text);word-break:break-all}
 .coords-link{color:var(--text);text-decoration:none;cursor:pointer;transition:opacity .2s}
 .coords-link:hover{opacity:.8}
+.lang-switch{position:fixed;top:20px;right:20px;z-index:10;display:flex;background:var(--card);border-radius:20px;padding:4px;box-shadow:var(--shadow)}
+.lang-btn{padding:6px 12px;border:none;background:transparent;color:var(--text);font-size:.9rem;cursor:pointer;border-radius:16px;transition:background .2s}
+.lang-btn.active{background:var(--secondary);color:var(--bg)}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,128,0,.9);color:#fff;padding:12px 24px;border-radius:30px;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s,transform .3s;z-index:1000;display:flex;align-items:center;gap:8px}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(-10px)}
-@media (max-width:680px){.main{margin-top:10vh}.cell{grid-template-columns:1fr 1.5fr}}
+@media (max-width:680px){.main{margin-top:10vh}.cell{grid-template-columns:1fr 1.5fr}.lang-switch{top:10px;right:10px}}
 @media (max-width:360px){.cell{grid-template-columns:1fr}.label{margin-bottom:2px}}
 </style>
 </head>
@@ -56,72 +59,100 @@ body{min-height:100vh;display:flex;flex-direction:column;align-items:center;just
 <div class="main">
   <div class="ip-card">
     <div id="flagSkeleton" class="flag-skeleton"></div>
-    <img id="ip-flag" class="flag-img" alt="国旗"/>
+    <img id="ip-flag" class="flag-img" alt="Country Flag"/>
     <div class="info">
       <div id="ipAddr" class="ip-big-value skeleton"></div>
       <div id="ipPlace" class="ip-place skeleton"></div>
     </div>
   </div>
   <div class="card">
-    <div class="title">详细网络信息</div>
+    <div class="title" data-zh="详细网络信息" data-en="Network Details"></div>
     <div class="row">
-      <div class="cell"><div class="label">IPv6 地址</div><div id="ipv6" class="value"></div></div>
-      <div class="cell"><div class="label">主机名</div><div id="hostname" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">国家</div><div id="country" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">自治系统（ASN）</div><div id="asn" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">运营商/组织</div><div id="org" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">大洲</div><div id="continent" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">坐标</div><div id="coords" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">邮编</div><div id="postal" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="IPv6 地址" data-en="IPv6 Address"></div><div id="ipv6" class="value"></div></div>
+      <div class="cell"><div class="label" data-zh="主机名" data-en="Hostname"></div><div id="hostname" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="国家" data-en="Country"></div><div id="country" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="自治系统（ASN）" data-en="ASN"></div><div id="asn" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="运营商/组织" data-en="ISP / Organization"></div><div id="org" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="大洲" data-en="Continent"></div><div id="continent" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="坐标" data-en="Coordinates"></div><div id="coords" class="value skeleton"></div></div>
+      <div class="cell"><div class="label" data-zh="邮编" data-en="Postal Code"></div><div id="postal" class="value skeleton"></div></div>
     </div>
   </div>
 </div>
-<div id="toast" class="toast"><i class="fa fa-check"></i> 已复制 IP 地址！</div>
+
+<!-- 语言切换按钮 -->
+<div class="lang-switch">
+  <button class="lang-btn" data-lang="zh">中文</button>
+  <button class="lang-btn active" data-lang="en">English</button>
+</div>
+
+<div id="toast" class="toast"><i class="fa fa-check"></i> <span data-zh="已复制 IP 地址！" data-en="IP Address Copied!"></span></div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.querySelector('#toast span')};
 let lastIpv6='';
 
 function toast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
-els.ipAddr.onclick=async()=>{const ip=els.ipAddr.textContent.trim();if(ip&&ip!=='未知'){try{await navigator.clipboard.writeText(ip);toast()}catch{alert('复制失败')}}}
+els.ipAddr.onclick=async()=>{const ip=els.ipAddr.textContent.trim();if(ip&&ip!=='未知'&&ip!=='Unknown'){try{await navigator.clipboard.writeText(ip);toast()}catch{alert('Copy failed')}}}
 
 function rmSk(el){el.classList.remove('skeleton')}
 function showFlag(){els.flagSk.style.display='none';els.flag.style.display='block';els.flag.classList.add('loaded')}
 
+// 语言切换逻辑
+const langBtns = document.querySelectorAll('.lang-btn');
+let currentLang = 'en'; // 默认英文
+
+function switchLang(lang){
+  currentLang = lang;
+  document.querySelectorAll('[data-zh]').forEach(el=>{
+    el.textContent = el.getAttribute(`data-${lang}`);
+  });
+  document.documentElement.lang = lang;
+  langBtns.forEach(btn=>btn.classList.toggle('active',btn.dataset.lang===lang));
+  els.toastMsg.textContent = els.toastMsg.getAttribute(`data-${lang}`);
+}
+
+// 初始化为英文
+switchLang('en');
+
+langBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>switchLang(btn.dataset.lang));
+});
+
 async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
-async function getIPs(){const [v4,v6]=await Promise.allSettled([fetchT('https://api.ipify.org?format=json'),fetchT('https://api64.ipify.org?format=json')]);const ipv4=v4.status==='fulfilled'?v4.value.ip||v4.value.text||'未知':'未知';const ipv6=v6.status==='fulfilled'?v6.value.ip||v6.value.text||'':'未检测到';if(ipv6&&ipv6!==ipv4)lastIpv6=ipv6;return{ipv4,ipv6:ipv6||lastIpv6||'未检测到'}}
+async function getIPs(){const [v4,v6]=await Promise.allSettled([fetchT('https://api.ipify.org?format=json'),fetchT('https://api64.ipify.org?format=json')]);const ipv4=v4.status==='fulfilled'?v4.value.ip||v4.value.text||'Unknown':'Unknown';const ipv6=v6.status==='fulfilled'?v6.value.ip||v6.value.text||'':'Not Detected';if(ipv6&&ipv6!==ipv4)lastIpv6=ipv6;return{ipv4,ipv6:ipv6||lastIpv6||'Not Detected'}}
 async function getGeo(ip){const apis=[`https://ipwho.is/${ip?encodeURIComponent(ip):''}`,`https://ipapi.co/${ip?encodeURIComponent(ip)+'/':''}json/`,'https://ipinfo.io/json'];for(const u of apis){try{const d=await fetchT(u);if(d&&(d.ip||d.query||d.loc))return d}catch{}}return null}
 
 function render(ip,geo){
   rmSk(els.ipAddr);
-  if(!geo){rmSk(els.ipPlace);els.ipPlace.textContent='未知地区';els.flagSk.style.display='none';return}
+  if(!geo){rmSk(els.ipPlace);els.ipPlace.textContent=currentLang==='zh'?'未知地区':'Unknown Location';els.flagSk.style.display='none';return}
   const place=(geo.country_name||geo.country||'')+(geo.city?' '+geo.city:'')+(geo.region_name||geo.region?' · '+(geo.region_name||geo.region):'');
-  els.ipPlace.textContent=place||'未知地区';rmSk(els.ipPlace);
+  els.ipPlace.textContent=place|| (currentLang==='zh'?'未知地区':'Unknown Location');rmSk(els.ipPlace);
   let code=(geo.country_code||geo.country||'').toLowerCase();if(code.length===2){els.flag.src=`https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/flags/4x3/${code}.svg`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
   [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal].forEach(rmSk);
-  els.ipv6.textContent=geo.ipv6||lastIpv6||'未检测到';
-  els.country.textContent=geo.country_name||geo.country||'未知';
+  els.ipv6.textContent=geo.ipv6||lastIpv6|| (currentLang==='zh'?'未检测到':'Not Detected');
+  els.country.textContent=geo.country_name||geo.country|| (currentLang==='zh'?'未知':'Unknown');
   const asnNum=geo.connection?.asn||geo.asn||'';
-  els.asn.textContent=asnNum?'AS'+asnNum:'未知';
-  els.org.textContent=geo.org||geo.connection?.isp||geo.isp||'未知';
-  els.continent.textContent=geo.continent_name||geo.continent||'未知';
+  els.asn.textContent=asnNum?(currentLang==='zh'?`AS${asnNum}`:`AS${asnNum}`): (currentLang==='zh'?'未知':'Unknown');
+  els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
+  els.continent.textContent=geo.continent_name||geo.continent|| (currentLang==='zh'?'未知':'Unknown');
   const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
   if(lat&&lon){
     els.coords.innerHTML=`<a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="coords-link">${lat}, ${lon}</a>`;
   }else{
-    els.coords.textContent='未知';
+    els.coords.textContent=currentLang==='zh'?'未知':'Unknown';
   }
-  els.postal.textContent=geo.postal||geo.postal_code||'未知';
-  fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h||'未检测到');
+  els.postal.textContent=geo.postal||geo.postal_code|| (currentLang==='zh'?'未知':'Unknown');
+  fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
 
-async function fetchHostname(ip){if(!ip)return'未检测到';try{const r=await fetch(`https://dns.google/resolve?name=${ip.split('.').reverse().join('.')}.in-addr.arpa&type=PTR`);const d=await r.json();return d.Answer?.[0]?.data?.replace(/\.$/,'')||'未检测到'}catch{return'未检测到'}}
+async function fetchHostname(ip){if(!ip)return currentLang==='zh'?'未检测到':'Not Detected';try{const r=await fetch(`https://dns.google/resolve?name=${ip.split('.').reverse().join('.')}.in-addr.arpa&type=PTR`);const d=await r.json();return d.Answer?.[0]?.data?.replace(/\.$/,'')|| (currentLang==='zh'?'未检测到':'Not Detected')}catch{return currentLang==='zh'?'未检测到':'Not Detected'}}
 
 async function start(){
   const {ipv4,ipv6}=await getIPs();
-  const primary=ipv4!=='未知'?ipv4:(ipv6.includes('未检测到')?'未知':ipv6);
+  const primary=ipv4!=='Unknown'?ipv4:(ipv6.includes('Not Detected')?'Unknown':ipv6);
   els.ipAddr.textContent=primary;rmSk(els.ipAddr);els.ipv6.textContent=ipv6;
-  if(primary==='未知'){els.flagSk.style.display='none';return}
+  if(primary==='Unknown'){els.flagSk.style.display='none';return}
   const geo=await getGeo(primary);
   render(primary,geo);
 }
