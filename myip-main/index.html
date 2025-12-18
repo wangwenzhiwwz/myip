@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+<title>IP 地址查询工具</title>
+<link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link rel="apple-touch-icon" sizes="180x180" href="https://wangwenzhi.eu.org/images/favicon_io/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-16x16.png">
+<link rel="manifest" href="https://wangwenzhi.eu.org/images/favicon_io/site.webmanifest">
+<style>
+/* -------- 基础变量与暗黑模式支持 -------- */
+:root {
+  --bg-color: #fff;
+  --text-color: #111;
+  --secondary-text: #333;
+  --tertiary-text: #888;
+  --border-color: #eee;
+  --light-border: #f0f0f0;
+  --card-bg: #fafafa;
+  --input-bg: #fff;
+  --input-border: #e0e1e6;
+  --button-bg: #111;
+  --button-text: #fff;
+  --refresh-bg: #fff;
+  --refresh-text: #111;
+  --error-color: #e00;
+  --shadow: 0 1px 8px #eee;
+  --radius: 16px;
+  --small-radius: 10px;
+  --spacing-unit: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #f0f0f0;
+    --secondary-text: #ccc;
+    --tertiary-text: #888;
+    --border-color: #333;
+    --light-border: #2a2a2a;
+    --card-bg: #2a2a2a;
+    --input-bg: #333;
+    --input-border: #444;
+    --button-bg: #444;
+    --button-text: #fff;
+    --refresh-bg: #333;
+    --refresh-text: #ddd;
+    --error-color: #ff4444;
+    --shadow: 0 1px 8px rgba(0,0,0,0.3);
+  }
+}
+
+/* -------- 基础与排版 -------- */
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--bg-color);
+  color:var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+body{
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding: 2vw;
+  box-sizing: border-box;
+}
+
+/* 主标题区 – 顶部留白自适应 */
+.main-top{
+  width:100%;
+  max-width:680px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-top:0;
+  gap: calc(var(--spacing-unit) * 2);
+  margin-top: 12vh;
+}
+
+/* IP 主卡片 */
+.ip-main-card{
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  gap: calc(var(--spacing-unit) * 1.5);
+  justify-content:center;
+  padding: calc(var(--spacing-unit) * 2) 0;
+}
+.flag-img{
+  width: clamp(48px, 12vw, 60px);
+  height: clamp(32px, 8vw, 40px);
+  border-radius: 8px;
+  background:var(--bg-color);
+  display:none;
+  object-fit:cover;
+  box-shadow:var(--shadow);
+}
+.ip-main-info{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: calc(var(--spacing-unit));
+}
+.ip-big-value{
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  font-weight:700;
+  color:var(--text-color);
+  word-break:break-all;
+  line-height:1.2;
+  text-align:center;
+}
+.ip-place{
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  color:var(--secondary-text);
+  line-height:1.5;
+  min-height:1.5em;
+  text-align:center;
+}
+
+/* 详细信息卡片 */
+.detail-card{
+  width:100%;
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 1.5);
+  display:flex;
+  flex-direction:column;
+  gap: calc(var(--spacing-unit));
+  box-shadow:var(--shadow);
+  box-sizing: border-box;
+}
+.detail-title{
+  font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+  font-weight:700;
+  color:var(--secondary-text);
+  padding-bottom: calc(var(--spacing-unit) * 0.5);
+  margin-bottom: calc(var(--spacing-unit) * 0.75);
+  border-bottom:1px solid var(--border-color);
+  letter-spacing:1px;
+}
+.detail-row{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr;
+  gap: calc(var(--spacing-unit) * 0.75);
+}
+.detail-cell{
+  display:grid;
+  grid-template-columns:1fr 2fr;
+  gap: calc(var(--spacing-unit) * 0.5);
+  align-items:center;
+  min-width:0;
+  padding: calc(var(--spacing-unit) * 0.5) 0;
+  border-bottom:1px solid var(--light-border);
+}
+.detail-label{
+  font-size: clamp(0.9rem, 3vw, 1.05rem);
+  color:var(--tertiary-text);
+  font-weight:500;
+  letter-spacing:.5px;
+}
+.detail-value{
+  font-size: clamp(0.9rem, 3vw, 1.05rem);
+  color:var(--text-color);
+  word-break:break-all;
+}
+.ipv6-value{
+  color:var(--text-color);
+}
+
+/* 操作行 */
+.op-row{
+  width:100%;
+  display:flex;
+  gap: calc(var(--spacing-unit));
+  margin-top: calc(var(--spacing-unit) * 0.5);
+}
+.ip-input-slim{
+  flex:1;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  padding: calc(var(--spacing-unit)) calc(var(--spacing-unit) * 1.25);
+  border:1px solid var(--input-border);
+  border-radius:var(--small-radius);
+  background:var(--input-bg);
+  color:var(--text-color);
+  outline:none;
+  box-sizing:border-box;
+  transition:border-color .19s, box-shadow .19s;
+}
+.ip-input-slim:focus{
+  border-color:var(--text-color);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.1) in dark;
+}
+.btn-slim{
+  padding: calc(var(--spacing-unit)) 0;
+  background:var(--button-bg);
+  color:var(--button-text);
+  border:none;
+  border-radius:var(--small-radius);
+  font-weight:700;
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  cursor:pointer;
+  min-width: clamp(80px, 25vw, 90px);
+  transition:background .19s, transform .1s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: calc(var(--spacing-unit) * 0.25);
+}
+.btn-slim:active{
+  transform: scale(0.98);
+}
+.btn-slim:focus{
+  background:var(--button-bg);
+}
+.btn-slim:disabled{
+  background:var(--input-border);
+  color:var(--tertiary-text);
+  cursor:not-allowed;
+}
+.btn-refresh{
+  background:var(--refresh-bg);
+  color:var(--refresh-text);
+  border:1px solid var(--border-color);
+}
+.btn-refresh:active,.btn-refresh:focus{
+  background:var(--input-bg);
+  color:var(--text-color);
+}
+
+/* 状态文本 */
+.status-text{
+  width:100%;
+  text-align:center;
+  font-size: clamp(0.9rem, 3vw, 1.05rem);
+  color:var(--tertiary-text);
+  min-height:1.7em;
+  margin-top: calc(var(--spacing-unit) * 1.25);
+  letter-spacing:.1px;
+}
+.status-text.ok{
+  color:var(--text-color);
+}
+.status-text.err{
+  color:var(--error-color);
+}
+.status-text.loading{
+  color:var(--text-color);
+}
+
+/* 访问计数器样式 – 与 status-text 相同 */
+#visitCount{
+  margin-top: calc(var(--spacing-unit) * 0.75);
+}
+
+/* 模式切换按钮 */
+.mode-toggle {
+  position: fixed;
+  top: 2vw;
+  right: 2vw;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  width: clamp(40px, 10vw, 50px);
+  height: clamp(40px, 10vw, 50px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: all 0.3s;
+  z-index: 100;
+}
+
+.mode-toggle i {
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  color: var(--text-color);
+}
+
+/* 移动端优化 */
+@media (max-width:680px){
+  .main-top{
+    margin-top: 10vh;
+  }
+  .detail-cell{
+    grid-template-columns: 1fr 1.5fr;
+  }
+  .op-row{
+    flex-wrap: wrap;
+  }
+  .btn-slim{
+    flex: 1;
+    min-width: auto;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width:360px){
+  .detail-cell{
+    grid-template-columns: 1fr;
+  }
+  .detail-label{
+    margin-bottom: 2px;
+  }
+}
+</style>
+</head>
+<body>
+<!-- 模式切换按钮 -->
+<div id="modeToggle" class="mode-toggle">
+  <i class="fa fa-moon-o" aria-hidden="true"></i>
+</div>
+
+<div class="main-top">
+  <div class="ip-main-card">
+    <img id="ip-flag" class="flag-img" alt="国旗" />
+    <div class="ip-main-info">
+      <div id="ipAddr" class="ip-big-value"></div>
+      <div id="ipPlace" class="ip-place"></div>
+    </div>
+  </div>
+  <div class="detail-card">
+    <div class="detail-title">详细网络信息</div>
+    <div class="detail-row">
+      <!-- IPv6 -->
+      <div class="detail-cell"><div class="detail-label">IPv6 地址</div><div id="ipv6" class="detail-value ipv6-value"></div></div>
+      <!-- 主机名 -->
+      <div class="detail-cell"><div class="detail-label">主机名</div><div id="hostname" class="detail-value"></div></div>
+      <!-- ASN -->
+      <div class="detail-cell"><div class="detail-label">自治系统（ASN）</div><div id="asn" class="detail-value"></div></div>
+      <!-- ISP/运营商 -->
+      <div class="detail-cell"><div class="detail-label">运营商/组织</div><div id="org" class="detail-value"></div></div>
+      <!-- 大洲 -->
+      <div class="detail-cell"><div class="detail-label">大洲</div><div id="continent" class="detail-value"></div></div>
+      <!-- 纬度 -->
+      <div class="detail-cell"><div class="detail-label">纬度</div><div id="lat" class="detail-value"></div></div>
+      <!-- 经度 -->
+      <div class="detail-cell"><div class="detail-label">经度</div><div id="lon" class="detail-value"></div></div>
+      <!-- 邮编 -->
+      <div class="detail-cell"><div class="detail-label">邮编</div><div id="postal" class="detail-value"></div></div>
+    </div>
+  </div>
+  <div class="op-row">
+    <input id="manualIp" class="ip-input-slim" type="text" placeholder="输入IP地址查询（留空查本机）">
+    <button id="btnQuery" class="btn-slim"><i class="fa fa-search" aria-hidden="true"></i> 查询</button>
+    <button id="btnRefresh" class="btn-slim btn-refresh"><i class="fa fa-refresh" aria-hidden="true"></i> 刷新</button>
+  </div>
+  <div id="status" class="status-text loading"></div>
+  <!-- 访问计数器 -->
+  <div id="visitCount" class="status-text"></div>
+</div>
+<script>
+const TIMEOUT=8000;
+const ipAddrEl=document.getElementById('ipAddr');
+const ipPlaceEl=document.getElementById('ipPlace');
+const ipv6El=document.getElementById('ipv6');
+const hostnameEl=document.getElementById('hostname');
+const asnEl=document.getElementById('asn');
+const orgEl=document.getElementById('org');
+const continentEl=document.getElementById('continent');
+const latEl=document.getElementById('lat');
+const lonEl=document.getElementById('lon');
+const postalEl=document.getElementById('postal');
+const statusEl=document.getElementById('status');
+const flagEl=document.getElementById('ip-flag');
+const manualIpInput=document.getElementById('manualIp');
+const btnQuery=document.getElementById('btnQuery');
+const btnRefresh=document.getElementById('btnRefresh');
+const modeToggle=document.getElementById('modeToggle');
+const modeIcon=modeToggle.querySelector('i');
+let lastIpv6='';
+let isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+/* 暗黑模式切换 */
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  
+  if (isDarkMode) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    modeIcon.classList.remove('fa-moon-o');
+    modeIcon.classList.add('fa-sun-o');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    modeIcon.classList.remove('fa-sun-o');
+    modeIcon.classList.add('fa-moon-o');
+  }
+  
+  localStorage.setItem('darkMode', isDarkMode ? 'true' : 'false');
+}
+
+// 初始化暗黑模式状态
+function initDarkMode() {
+  const savedMode = localStorage.getItem('darkMode');
+  if (savedMode !== null) {
+    isDarkMode = savedMode === 'true';
+  } else {
+    isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  
+  if (isDarkMode) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    modeIcon.classList.remove('fa-moon-o');
+    modeIcon.classList.add('fa-sun-o');
+  }
+  
+  // 监听系统主题变化
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (localStorage.getItem('darkMode') === null) { // 只有在未手动设置过时才跟随系统
+      isDarkMode = e.matches;
+      if (isDarkMode) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        modeIcon.classList.remove('fa-moon-o');
+        modeIcon.classList.add('fa-sun-o');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        modeIcon.classList.remove('fa-sun-o');
+        modeIcon.classList.add('fa-moon-o');
+      }
+    }
+  });
+}
+
+/* ---------- 通用 fetch ---------- */
+async function fetchWithTimeout(url, timeout=TIMEOUT){
+  const controller=new AbortController();
+  const id=setTimeout(()=>controller.abort(), timeout);
+  try{
+    const rs=await fetch(url,{signal:controller.signal});
+    if(!rs.ok) throw new Error(`HTTP 错误: ${rs.status}`);
+    const ct=rs.headers.get('content-type')||'';
+    if(ct.includes('application/json')||ct.includes('text/plain')) return await rs.json();
+    return {text:await rs.text()};
+  }finally{
+    clearTimeout(id);
+  }
+}
+
+/* ---------- 反向 DNS (PTR) 查询 ---------- */
+async function fetchHostname(ip){
+  if(!ip) return '未检测到';
+  const rev = ip.split('.').reverse().join('.') + '.in-addr.arpa';
+  try{
+    const r = await fetch(`https://dns.google/resolve?name=${rev}&type=PTR`);
+    const data = await r.json();
+    const host = data?.Answer?.[0]?.data?.replace(/\.$/, '');
+    return host || '未检测到';
+  }catch(_){
+    return '未检测到';
+  }
+}
+
+/* ---------- 主体逻辑：查询地理信息 ---------- */
+async function fetchGeoInfo(ip=''){
+  updateStatus('正在查询地理信息…','loading');
+  try{
+    const url = ip ? `https://ipwho.is/${encodeURIComponent(ip)}` : 'https://ipwho.is/?format=json';
+    const data = await fetchWithTimeout(url);
+    if(data && (data.success===true||data.success===undefined)){
+      renderGeo(data);
+      updateStatus('', 'ok');
+      return;
+    }
+    throw new Error('ipwho.is 返回无效');
+  }catch(e){
+    // 失败后尝试第二个服务
+    try{
+      const url = ip ? `https://ipapi.co/${encodeURIComponent(ip)}/json/` : 'https://ipapi.co/json/';
+      const data = await fetchWithTimeout(url);
+      renderGeo(data);
+      updateStatus('', 'ok');
+    }catch(e){
+      updateStatus('地理信息查询失败，请稍后重试', 'err');
+      resetLoading(false);
+    }
+  }
+}
+
+/* ---------- 解析并渲染 Geo 数据 ---------- */
+function renderGeo(data){
+  // 国旗
+  let code='';
+  if(data.country_code && /^[A-Za-z]{2}$/.test(data.country_code)) code=data.country_code.toLowerCase();
+  else if(data.country && /^[A-Za-z]{2}$/.test(data.country)) code=data.country.toLowerCase();
+  if(code){
+    flagEl.src=`https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/flags/4x3/${code}.svg`;
+    flagEl.style.display='block';
+  }else flagEl.style.display='none';
+
+  // IP & 地区
+  const ipVal = data.ip||data.query||data.address||'未知IP';
+  ipAddrEl.textContent=ipVal;
+  const place = (data.country_name||data.country||'') 
+                + (data.city?' '+data.city:'' )
+                + (data.region_name||data.region?' · '+(data.region_name||data.region):'');
+  ipPlaceEl.textContent=place;
+
+  // IPv6
+  if(data.ipv6||(data.connection&&data.connection.ipv6)){
+    lastIpv6=data.ipv6||data.connection.ipv6;
+    ipv6El.textContent=lastIpv6;
+  }else ipv6El.textContent=lastIpv6?lastIpv6:'未检测到';
+
+  // 主机名（反向 DNS）
+  hostnameEl.textContent='';
+  fetchHostname(data.ip||data.query||'').then(host=>{ hostnameEl.textContent=host; });
+
+  // ASN
+  asnEl.textContent=(data.connection?.asn)||data.asn||'未知';
+
+  // ISP/运营商
+  orgEl.textContent=data.org||data.connection?.isp||data.isp||'未知';
+
+  // 大洲
+  continentEl.textContent=data.continent_name||data.continent||'未知';
+
+  // 纬度
+  latEl.textContent=data.latitude||'未知';
+
+  // 经度
+  lonEl.textContent=data.longitude||'未知';
+
+  // 邮编
+  postalEl.textContent=data.postal||data.postal_code||'未知';
+}
+
+/* ---------- 本机 IP 检测 ---------- */
+async function getLocalIP(){
+  resetLoading(true);
+  updateStatus('正在获取本机 IP 地址…','loading');
+  let ip='',ipv6='';
+  try{
+    const r=await fetchWithTimeout('https://api.ipify.org?format=json');
+    ip=r.ip||r.text||'';
+    ipAddrEl.textContent=ip;
+  }catch(e){
+    ipAddrEl.textContent='无法获取 IPv4 地址';
+  }
+  try{
+    const r=await fetchWithTimeout('https://api64.ipify.org?format=json');
+    ipv6=r.ip||r.text||'';
+    if(ipv6&&ipv6!==ip){
+      lastIpv6=ipv6;
+      ipv6El.textContent=ipv6;
+    }else ipv6El.textContent='未检测到';
+  }catch(e){
+    ipv6El.textContent=lastIpv6?lastIpv6:'未检测到';
+  }
+  if(ip&& !ip.startsWith('无法')){
+    await fetchGeoInfo(ip);
+  }else if(lastIpv6&& !lastIpv6.startsWith('未检测')){
+    await fetchGeoInfo(lastIpv6);
+  }else{
+    updateStatus('未检测到可用公网 IP，无法查询地理信息', 'err');
+    resetLoading(false);
+  }
+}
+
+/* ---------- 手动查询 ---------- */
+async function handleManualQuery(){
+  const target=manualIpInput.value.trim();
+  if(!target){
+    updateStatus('请输入 IP 地址，留空查本机','default');
+    return;
+  }
+  setBtnDisabled(true);
+  resetLoading(true);
+  updateStatus('正在查询 IP: '+target+' 的信息…','loading');
+  try{
+    ipAddrEl.textContent=target;
+    ipPlaceEl.textContent='';
+    await fetchGeoInfo(target);
+  }finally{
+    setBtnDisabled(false);
+  }
+}
+
+/* ---------- UI 辅助函数 ---------- */
+function updateStatus(msg,type='default'){
+  statusEl.textContent=msg;
+  statusEl.className=`status-text ${type}`;
+}
+function resetLoading(isLoading){
+  // 只清空文本内容，不再显示动画
+  const elList=[ipAddrEl,ipPlaceEl,ipv6El,hostnameEl,asnEl,orgEl,continentEl,latEl,lonEl,postalEl];
+  elList.forEach(el=>{el.textContent='';});
+}
+function setBtnDisabled(dis){
+  btnQuery.disabled=btnRefresh.disabled=dis;
+  btnQuery.innerHTML=dis?
+    `<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 查询中`:
+    `<i class="fa fa-search" aria-hidden="true"></i> 查询`;
+  btnRefresh.innerHTML=dis?
+    `<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> 刷新中`:
+    `<i class="fa fa-refresh" aria-hidden="true"></i> 刷新`;
+}
+
+/* ---------- 访问计数器 ---------- */
+async function updateVisitorCount(){
+  const countEl=document.getElementById('visitCount');
+  const namespace = encodeURIComponent(location.hostname || 'localhost');
+  const key = 'visits';
+  const counterUrl = `https://api.counterapi.org/api/${namespace}/${key}`;
+
+  try{
+    // POST 触发计数 +1，并获取最新值
+    const resp = await fetch(counterUrl, {method:'POST'});
+    const data = await resp.json();
+    const val = data?.value ?? null;
+    if(val!==null){
+      countEl.textContent=`本页面已被 ${val} 位访客访问`;
+      return;
+    }
+  }catch(e){
+    // 发生错误时使用本地计数器
+  }
+
+  // 本地备胎（localStorage）
+  const localKey = `visitorCount_${namespace}`;
+  let localVal = parseInt(localStorage.getItem(localKey) || '0', 10);
+  localVal += 1;
+  localStorage.setItem(localKey, localVal);
+  countEl.textContent=`（本地计数）本页面已被 ${localVal} 位访客访问`;
+}
+
+/* ---------- 事件绑定 & 初始加载 ---------- */
+btnQuery.addEventListener('click',handleManualQuery);
+btnRefresh.addEventListener('click',async()=>{
+  setBtnDisabled(true);
+  await getLocalIP();
+  setBtnDisabled(false);
+});
+modeToggle.addEventListener('click', toggleDarkMode);
+
+// 移动端输入框回车触发查询
+manualIpInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    handleManualQuery();
+  }
+});
+
+window.addEventListener('DOMContentLoaded',async()=>{
+  initDarkMode(); // 初始化暗黑模式
+  await getLocalIP();   // 首先获取本机 IP
+  await updateVisitorCount(); // 再更新访客计数
+});
+</script>
+</body>
+</html>
