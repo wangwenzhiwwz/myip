@@ -16,7 +16,7 @@
 <link rel="manifest" href="https://wangwenzhi.eu.org/images/favicon_io/site.webmanifest">
 <style>
 :root{
---bg:#fff;--text:#111;--secondary:#333;--tertiary:#888;--border:#eee;--light-border:#f0f0f0;--card:#fafafa;--shadow:0 1px 8px #eee;--radius:16px;--unit:8px;--skeleton-base:#ebebeb;--skeleton-shine:#f5f5f5
+--bg:#fff;--text:#111;--secondary:#333;--tertiary:#888;--border:#eee;--light-border:#f0f0f0;--card:#fafafa;--shadow:0 1px 8px #eee;--radius:24px;--unit:8px;--skeleton-base:#ebebeb;--skeleton-shine:#f5f5f5
 }
 @media (prefers-color-scheme:dark){
 :root{--bg:#1a1a1a;--text:#f0f0f0;--secondary:#ccc;--tertiary:#888;--border:#333;--light-border:#2a2a2a;--card:#2a2a2a;--shadow:0 1px 8px rgba(0,0,0,.3);--skeleton-base:#2c2c2c;--skeleton-shine:#383838}
@@ -26,13 +26,13 @@ html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSyste
 body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top) 2vw env(safe-area-inset-bottom);box-sizing:border-box}
 .main{max-width:680px;width:100%;margin:15vh auto 0;display:flex;flex-direction:column;align-items:center;gap:calc(var(--unit)*2)}
 .ip-card{display:flex;align-items:center;justify-content:center;gap:calc(var(--unit)*3);padding:calc(var(--unit)*2) 0;min-height:110px;width:100%}
-.flag-skeleton{width:clamp(72px,15vw,90px);height:clamp(54px,11.25vw,67.5px);background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:10px;box-shadow:var(--shadow);flex-shrink:0}
+.flag-skeleton{width:clamp(72px,15vw,90px);height:clamp(54px,11.25vw,67.5px);background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:16px;box-shadow:var(--shadow);flex-shrink:0}
 @keyframes s{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.flag-img{width:clamp(72px,15vw,90px);aspect-ratio:4/3;border-radius:10px;box-shadow:var(--shadow);object-fit:cover;display:none;opacity:0;transition:opacity .4s}
+.flag-img{width:clamp(72px,15vw,90px);aspect-ratio:4/3;border-radius:16px;box-shadow:var(--shadow);object-fit:cover;display:none;opacity:0;transition:opacity .4s}
 .flag-img.loaded{display:block;opacity:1}
 .info{display:flex;flex-direction:column;align-items:center;gap:10px}
-#ipAddr{font-size:clamp(2rem,8vw,3.2rem);font-weight:700;cursor:pointer;transition:opacity .2s;text-align:center;word-break:break-all;line-height:1.2}
-#ipAddr:hover{opacity:.8}
+#ipAddr{font-size:clamp(2rem,8vw,3.2rem);font-weight:700;transition:opacity .2s;text-align:center;word-break:break-all;line-height:1.2;-webkit-touch-callout:default;-webkit-user-select:text;user-select:text}
+#ipAddr:active{opacity:.6}
 #ipPlace{font-size:clamp(1rem,4vw,1.3rem);color:var(--secondary);text-align:center;min-height:1.5em}
 .skeleton{background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:8px}
 .ip-big-value.skeleton{height:clamp(2rem,8vw,3.2rem);width:220px}
@@ -47,24 +47,114 @@ body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padd
 .coords-link{color:var(--text);text-decoration:none;cursor:pointer;transition:opacity .2s}
 .coords-link:hover{opacity:.8}
 
-/* 语言切换（右上角，小按钮 + 简写） */
-.lang-controls{position:fixed;top:env(safe-area-inset-top);right:8px;z-index:10;display:flex;background:var(--card);border-radius:16px;padding:4px;box-shadow:var(--shadow);gap:2px}
-.lang-btn{padding:4px 10px;border:none;background:transparent;color:var(--text);font-size:.85rem;font-weight:600;cursor:pointer;border-radius:12px;transition:background .2s}
-.lang-btn.active{background:var(--secondary);color:var(--bg)}
+/* 语言切换 */
+.lang-controls{
+  position:fixed;
+  top:calc(env(safe-area-inset-top) + 12px);
+  right:12px;
+  z-index:10;
+  display:flex;
+  background:var(--card);
+  border-radius:20px;
+  padding:6px;
+  box-shadow:var(--shadow);
+  gap:4px;
+}
+.lang-btn{
+  padding:6px 12px;
+  border:none;
+  background:transparent;
+  color:var(--text);
+  font-size:.85rem;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:16px;
+  transition:background .2s;
+}
+.lang-btn.active{
+  background:var(--secondary);
+  color:var(--bg);
+}
 
-/* 刷新按钮（右下角，更小更简约） */
-.refresh-fab{position:fixed;bottom:max(16px,env(safe-area-inset-bottom));right:12px;z-index:10;width:44px;height:44px;background:var(--card);color:var(--text);border:none;border-radius:50%;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;transition:background .2s,transform .2s;opacity:0.8}
+/* 刷新按钮 */
+.refresh-fab{
+  position:fixed;
+  bottom:max(16px,env(safe-area-inset-bottom));
+  right:12px;
+  z-index:10;
+  width:44px;
+  height:44px;
+  background:var(--card);
+  color:var(--text);
+  border:none;
+  border-radius:50%;
+  box-shadow:var(--shadow);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:1.2rem;
+  transition:background .2s,transform .2s;
+  opacity:0.8;
+}
 .refresh-fab:hover{opacity:1;transform:scale(1.1)}
 .refresh-fab:active{transform:scale(.95)}
 
-.toast{position:fixed;bottom:max(70px,calc(env(safe-area-inset-bottom)+16px));left:50%;transform:translateX(-50%);background:rgba(0,128,0,.9);color:#fff;padding:14px 28px;border-radius:30px;font-size:1rem;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s,transform .3s;z-index:1000;display:flex;align-items:center;gap:8px}
-.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(-10px)}
+/* Toast 提示弹窗：磨砂质感（浅色浅白 / 暗黑深黑） */
+.toast{
+  position:fixed;
+  bottom:max(24px,env(safe-area-inset-bottom));
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(255,255,255,0.75); /* 浅色模式：浅白半透明磨砂 */
+  color:#111;
+  padding:16px 32px;
+  border-radius:40px;
+  font-size:1rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .4s,visibility .4s,transform .4s;
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.4);
+}
+.toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(-50%) translateY(-12px);
+}
+.toast i{
+  font-size:1.3rem;
+}
+@media (prefers-color-scheme:dark){
+  .toast{
+    background:rgba(17,17,17,0.75); /* 暗黑模式：深黑半透明磨砂 */
+    color:#fff;
+    border:1px solid rgba(0,0,0,.4);
+  }
+}
 @media (max-width:680px){
 .main{margin-top:12vh}
 .cell{grid-template-columns:1fr 1.8fr}
-.lang-controls{top:calc(env(safe-area-inset-top)+4px);right:4px;padding:3px}
-.lang-btn{padding:3px 8px;font-size:.8rem}
+.lang-controls{
+  top:calc(env(safe-area-inset-top) + 8px);
+  right:8px;
+  padding:4px;
+  border-radius:18px;
+}
+.lang-btn{padding:4px 10px;border-radius:14px;font-size:.8rem}
 .refresh-fab{width:40px;height:40px;font-size:1.1rem}
+.toast{
+  bottom:max(20px,env(safe-area-inset-bottom));
+  padding:14px 28px;
+  font-size:.95rem;
+  gap:10px;
+}
 }
 @media (max-width:480px){
 .ip-card{flex-direction:column;gap:calc(var(--unit)*2)}
@@ -102,17 +192,18 @@ body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padd
   </div>
 </div>
 
-<!-- 语言切换（右上角，小按钮 + 简写） -->
+<!-- 语言切换 -->
 <div class="lang-controls">
   <button class="lang-btn" data-lang="zh">中</button>
   <button class="lang-btn active" data-lang="en">EN</button>
 </div>
 
-<!-- 刷新按钮（右下角，更小更简约） -->
+<!-- 刷新按钮 -->
 <button id="refreshBtn" class="refresh-fab" aria-label="Refresh">
   <i class="fa fa-refresh"></i>
 </button>
 
+<!-- Toast 提示弹窗（磨砂质感） -->
 <div id="toast" class="toast"><i class="fa fa-check"></i> <span data-zh="已复制 IP 地址！" data-en="IP Address Copied!"></span></div>
 
 <script>
@@ -120,7 +211,7 @@ const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementB
 let lastIpv6='';
 let currentLang = 'en';
 
-// 刷新按钮（右下角）
+// 刷新按钮
 document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
 
 // 语言切换逻辑
@@ -140,8 +231,33 @@ function switchLang(lang){
 switchLang('en');
 langBtns.forEach(btn=>btn.addEventListener('click',()=>switchLang(btn.dataset.lang)));
 
+async function copyIP(){
+  const ip = els.ipAddr.textContent.trim();
+  if(ip && ip !== 'Unknown' && ip !== '未知'){
+    try{
+      await navigator.clipboard.writeText(ip);
+      toast();
+    }catch{
+      const range = document.createRange();
+      range.selectNode(els.ipAddr);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      try{
+        document.execCommand('copy');
+        toast();
+      }catch{}
+      window.getSelection().removeAllRanges();
+    }
+  }
+}
+
+// 点击 或 长按 复制 IP
+els.ipAddr.addEventListener('click', copyIP);
+els.ipAddr.addEventListener('touchstart', e => e.preventDefault());
+els.ipAddr.addEventListener('touchend', e => {e.preventDefault(); copyIP();});
+els.ipAddr.addEventListener('contextmenu', e => e.preventDefault());
+
 function toast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
-els.ipAddr.onclick=async()=>{const ip=els.ipAddr.textContent.trim();if(ip&&ip!=='Unknown'){try{await navigator.clipboard.writeText(ip);toast()}catch{alert('Copy failed')}}}
 
 function rmSk(el){el.classList.remove('skeleton')}
 function showFlag(){els.flagSk.style.display='none';els.flag.style.display='block';els.flag.classList.add('loaded')}
