@@ -75,22 +75,11 @@ body{min-height:100vh;display:flex;flex-direction:column;align-items:center;just
       <div class="cell"><div class="label">邮编</div><div id="postal" class="value skeleton"></div></div>
     </div>
   </div>
-
-  <!-- 客户端信息（不显示完整 User Agent） -->
-  <div class="card">
-    <div class="title">客户端信息</div>
-    <div class="row">
-      <div class="cell"><div class="label">浏览器</div><div id="browser" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">浏览器版本</div><div id="browserVersion" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">操作系统</div><div id="os" class="value skeleton"></div></div>
-      <div class="cell"><div class="label">设备类型</div><div id="deviceType" class="value skeleton"></div></div>
-    </div>
-  </div>
 </div>
 <div id="toast" class="toast"><i class="fa fa-check"></i> 已复制 IP 地址！</div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),browser:document.getElementById('browser'),browserVersion:document.getElementById('browserVersion'),os:document.getElementById('os'),deviceType:document.getElementById('deviceType'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast')};
 let lastIpv6='';
 
 function toast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
@@ -102,32 +91,6 @@ function showFlag(){els.flagSk.style.display='none';els.flag.style.display='bloc
 async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
 async function getIPs(){const [v4,v6]=await Promise.allSettled([fetchT('https://api.ipify.org?format=json'),fetchT('https://api64.ipify.org?format=json')]);const ipv4=v4.status==='fulfilled'?v4.value.ip||v4.value.text||'未知':'未知';const ipv6=v6.status==='fulfilled'?v6.value.ip||v6.value.text||'':'未检测到';if(ipv6&&ipv6!==ipv4)lastIpv6=ipv6;return{ipv4,ipv6:ipv6||lastIpv6||'未检测到'}}
 async function getGeo(ip){const apis=[`https://ipwho.is/${ip?encodeURIComponent(ip):''}`,`https://ipapi.co/${ip?encodeURIComponent(ip)+'/':''}json/`,'https://ipinfo.io/json'];for(const u of apis){try{const d=await fetchT(u);if(d&&(d.ip||d.query||d.loc))return d}catch{}}return null}
-
-// 简单解析 User Agent（纯 JS，无依赖）
-function parseUA(ua){
-  const isMobile = /Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune/.test(ua);
-  const isTablet = /iPad|Android(?!.*Mobile)|Tablet|Silk/.test(ua);
-  let deviceType = 'PC';
-  if(isMobile) deviceType = '手机';
-  if(isTablet) deviceType = '平板';
-
-  let browser = '未知';
-  let version = '未知';
-  if(/Edg/.test(ua)){browser='Edge';version=ua.match(/Edg\/([\d.]+)/)?.[1]||'未知'}
-  else if(/Chrome/.test(ua)){browser='Chrome';version=ua.match(/Chrome\/([\d.]+)/)?.[1]||'未知'}
-  else if(/Safari/.test(ua)){browser='Safari';version=ua.match(/Version\/([\d.]+)/)?.[1]||'未知'}
-  else if(/Firefox/.test(ua)){browser='Firefox';version=ua.match(/Firefox\/([\d.]+)/)?.[1]||'未知'}
-  else if(/Opera|OPR/.test(ua)){browser='Opera';version=ua.match(/(Opera|OPR)\/([\d.]+)/)?.[2]||'未知'}
-
-  let os = '未知';
-  if(/Windows NT/.test(ua)){os='Windows'}
-  else if(/Mac OS X/.test(ua)){os='macOS'}
-  else if(/Linux/.test(ua)){os='Linux'}
-  else if(/Android/.test(ua)){os='Android'}
-  else if(/iPhone|iPad|iPod/.test(ua)){os='iOS'}
-
-  return {browser,version,os,deviceType};
-}
 
 function render(ip,geo){
   rmSk(els.ipAddr);
@@ -150,14 +113,6 @@ function render(ip,geo){
   }
   els.postal.textContent=geo.postal||geo.postal_code||'未知';
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h||'未检测到');
-
-  // 客户端信息（不显示完整 User Agent）
-  const uaInfo = parseUA(navigator.userAgent);
-  [els.browser,els.browserVersion,els.os,els.deviceType].forEach(rmSk);
-  els.browser.textContent = uaInfo.browser;
-  els.browserVersion.textContent = uaInfo.version;
-  els.os.textContent = uaInfo.os;
-  els.deviceType.textContent = uaInfo.deviceType;
 }
 
 async function fetchHostname(ip){if(!ip)return'未检测到';try{const r=await fetch(`https://dns.google/resolve?name=${ip.split('.').reverse().join('.')}.in-addr.arpa&type=PTR`);const d=await r.json();return d.Answer?.[0]?.data?.replace(/\.$/,'')||'未检测到'}catch{return'未检测到'}}
