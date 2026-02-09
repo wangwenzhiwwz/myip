@@ -3,278 +3,392 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>IP Address Lookup Tool</title>
+<title>IP Insight | Compact</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
 <link rel="preconnect" href="https://ipapi.co">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://flagcdn.com">
 <link rel="preconnect" href="https://dns.google">
-<link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-<link rel="apple-touch-icon" sizes="180x180" href="https://wangwenzhi.eu.org/images/favicon_io/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="https://wangwenzhi.eu.org/images/favicon_io/favicon-16x16.png">
-<link rel="manifest" href="https://wangwenzhi.eu.org/images/favicon_io/site.webmanifest">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%232d3748%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 dy=%22.35em%22>IP</text></svg>">
+
 <style>
-:root{
---bg:#fff;--text:#111;--secondary:#333;--tertiary:#888;--border:#eee;--light-border:#f0f0f0;--card:#fafafa;--shadow:0 1px 8px #eee;--radius:24px;--unit:8px;--skeleton-base:#ebebeb;--skeleton-shine:#f5f5f5
-}
-@media (prefers-color-scheme:dark){
-:root{--bg:#1a1a1a;--text:#f0f0f0;--secondary:#ccc;--tertiary:#888;--border:#333;--light-border:#2a2a2a;--card:#2a2a2a;--shadow:0 1px 8px rgba(0,0,0,.3);--skeleton-base:#2c2c2c;--skeleton-shine:#383838}
-.flag-img{filter:brightness(.9)saturate(1.2)}
-}
-html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top) 2vw env(safe-area-inset-bottom);box-sizing:border-box}
-.main{max-width:680px;width:100%;margin:15vh auto 0;display:flex;flex-direction:column;align-items:center;gap:calc(var(--unit)*2)}
-.ip-card{display:flex;align-items:center;justify-content:center;gap:calc(var(--unit)*3);padding:calc(var(--unit)*2) 0;min-height:110px;width:100%}
-.flag-skeleton{width:clamp(72px,15vw,90px);height:clamp(54px,11.25vw,67.5px);background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:16px;box-shadow:var(--shadow);flex-shrink:0}
-@keyframes s{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.flag-img{width:clamp(72px,15vw,90px);aspect-ratio:4/3;border-radius:16px;box-shadow:var(--shadow);object-fit:cover;display:none;opacity:0;transition:opacity .4s}
-.flag-img.loaded{display:block;opacity:1}
-.info{display:flex;flex-direction:column;align-items:center;gap:10px}
-#ipAddr{font-size:clamp(2rem,8vw,3.2rem);font-weight:700;transition:opacity .2s;text-align:center;word-break:break-all;line-height:1.2;-webkit-touch-callout:default;-webkit-user-select:text;user-select:text}
-#ipAddr:active{opacity:.6}
-#ipPlace{font-size:clamp(1rem,4vw,1.3rem);color:var(--secondary);text-align:center;min-height:1.5em}
-.skeleton{background:var(--skeleton-base);background:linear-gradient(90deg,var(--skeleton-base)25%,var(--skeleton-shine)50%,var(--skeleton-base)75%);background-size:200% 100%;animation:s 2s infinite ease-in-out;border-radius:8px}
-.ip-big-value.skeleton{height:clamp(2rem,8vw,3.2rem);width:220px}
-.ip-place.skeleton{height:1.5em;width:180px}
-.detail-value.skeleton{height:1.2em;width:70%}
-.card{background:var(--card);border-radius:var(--radius);padding:calc(var(--unit)*2);box-shadow:var(--shadow);width:100%;box-sizing:border-box}
-.title{font-size:clamp(1.1rem,3.5vw,1.3rem);font-weight:700;color:var(--secondary);padding-bottom:calc(var(--unit)*.5);margin-bottom:calc(var(--unit)*.75);border-bottom:1px solid var(--border);letter-spacing:1px}
-.row{display:grid;gap:calc(var(--unit)*.75)}
-.cell{display:grid;grid-template-columns:1fr 2fr;gap:calc(var(--unit)*.5);align-items:center;padding:calc(var(--unit)*.5) 0;border-bottom:1px solid var(--light-border)}
-.label{font-size:clamp(.9rem,3vw,1.05rem);color:var(--tertiary);font-weight:500;letter-spacing:.5px}
-.value{font-size:clamp(.9rem,3vw,1.05rem);color:var(--text);word-break:break-all}
-.coords-link{color:var(--text);text-decoration:none;cursor:pointer;transition:opacity .2s}
-.coords-link:hover{opacity:.8}
-
-/* 语言切换 */
-.lang-controls{
-  position:fixed;
-  top:calc(env(safe-area-inset-top) + 12px);
-  right:12px;
-  z-index:10;
-  display:flex;
-  background:var(--card);
-  border-radius:20px;
-  padding:6px;
-  box-shadow:var(--shadow);
-  gap:4px;
-}
-.lang-btn{
-  padding:6px 12px;
-  border:none;
-  background:transparent;
-  color:var(--text);
-  font-size:.85rem;
-  font-weight:600;
-  cursor:pointer;
-  border-radius:16px;
-  transition:background .2s;
-}
-.lang-btn.active{
-  background:var(--secondary);
-  color:var(--bg);
+/* --- Compact Soft UI System --- */
+:root {
+  --bg-body: #f3f4f6;
+  --bg-card: #ffffff;
+  --text-main: #1a202c;
+  --text-label: #a0aec0;
+  --text-value: #2d3748;
+  --accent: #1a202c;
+  
+  /* 阴影调小，更精致 */
+  --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.05), 0 5px 10px -5px rgba(0,0,0,0.02);
+  --shadow-hover: 0 15px 30px -8px rgba(0,0,0,0.08);
+  
+  --radius: 24px; /* 圆角稍微减小 */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* 刷新按钮 */
-.refresh-fab{
-  position:fixed;
-  bottom:max(16px,env(safe-area-inset-bottom));
-  right:12px;
-  z-index:10;
-  width:44px;
-  height:44px;
-  background:var(--card);
-  color:var(--text);
-  border:none;
-  border-radius:50%;
-  box-shadow:var(--shadow);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  font-size:1.2rem;
-  transition:background .2s,transform .2s;
-  opacity:0.8;
-}
-.refresh-fab:hover{opacity:1;transform:scale(1.1)}
-.refresh-fab:active{transform:scale(.95)}
-
-/* Toast 提示弹窗：磨砂质感（浅色浅白 / 暗黑深黑） */
-.toast{
-  position:fixed;
-  bottom:max(24px,env(safe-area-inset-bottom));
-  left:50%;
-  transform:translateX(-50%);
-  background:rgba(255,255,255,0.75); /* 浅色模式：浅白半透明磨砂 */
-  color:#111;
-  padding:16px 32px;
-  border-radius:40px;
-  font-size:1rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.2);
-  opacity:0;
-  visibility:hidden;
-  transition:opacity .4s,visibility .4s,transform .4s;
-  z-index:1000;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border:1px solid rgba(255,255,255,.4);
-}
-.toast.show{
-  opacity:1;
-  visibility:visible;
-  transform:translateX(-50%) translateY(-12px);
-}
-.toast i{
-  font-size:1.3rem;
-}
-@media (prefers-color-scheme:dark){
-  .toast{
-    background:rgba(17,17,17,0.75); /* 暗黑模式：深黑半透明磨砂 */
-    color:#fff;
-    border:1px solid rgba(0,0,0,.4);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #171923;
+    --bg-card: #2d3748;
+    --text-main: #f7fafc;
+    --text-label: #a0aec0;
+    --text-value: #edf2f7;
+    --accent: #ffffff;
+    --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.3);
   }
 }
-@media (max-width:680px){
-.main{margin-top:12vh}
-.cell{grid-template-columns:1fr 1.8fr}
-.lang-controls{
-  top:calc(env(safe-area-inset-top) + 8px);
-  right:8px;
-  padding:4px;
-  border-radius:18px;
+
+* { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  /* 减小页面内边距 */
+  padding: 30px 16px; 
+  transition: background 0.3s;
 }
-.lang-btn{padding:4px 10px;border-radius:14px;font-size:.8rem}
-.refresh-fab{width:40px;height:40px;font-size:1.1rem}
-.toast{
-  bottom:max(20px,env(safe-area-inset-bottom));
-  padding:14px 28px;
-  font-size:.95rem;
-  gap:10px;
+
+.container {
+  width: 100%;
+  /* 减小最大宽度，更紧凑 */
+  max-width: 800px; 
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 减小间距 */
 }
+
+/* Controls */
+.controls-header {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: -8px;
+  z-index: 10;
 }
-@media (max-width:480px){
-.ip-card{flex-direction:column;gap:calc(var(--unit)*2)}
-.info{gap:8px}
-#ipAddr{font-size:clamp(1.8rem,7vw,2.8rem)}
+.btn-circle {
+  width: 36px; height: 36px; /* 按钮变小 */
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-main);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: all 0.2s;
 }
-@media (max-width:360px){
-.cell{grid-template-columns:1fr}
-.label{margin-bottom:4px}
+.btn-circle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.btn-circle.active { background: var(--text-main); color: var(--bg-body); }
+
+/* --- Hero Card --- */
+.hero-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  /* 减小内边距 */
+  padding: 40px 30px; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.flag-container {
+  width: 80px; height: 60px; /* 国旗变小 */
+  border-radius: 12px;
+  background: var(--bg-body);
+  margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
+.flag-img.loaded { opacity: 1; }
+
+.label-sup {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-label);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+#ipAddr {
+  /* 缩小 IP 字号 */
+  font-size: clamp(2.2rem, 5vw, 3.5rem); 
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -0.03em;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+#ipAddr:active { opacity: 0.5; }
+
+.location-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-body);
+  padding: 8px 20px; /* 胶囊变小 */
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-value);
+}
+.location-pill i { font-size: 0.9em; color: var(--text-main); }
+
+/* --- Bento Grid --- */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; /* 减小网格间距 */
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: 20px; /* 圆角微调 */
+  box-shadow: var(--shadow-card);
+  padding: 20px; /* 减小卡片内边距 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+.info-row { display: flex; flex-direction: column; gap: 6px; }
+
+.card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.card-label i { font-size: 1.1em; color: var(--text-label); opacity: 0.8; }
+
+.card-value {
+  font-family: monospace;
+  font-size: 0.9rem; /* 字号微调 */
+  font-weight: 600;
+  color: var(--text-value);
+  word-break: break-all;
+  line-height: 1.4;
+}
+.text-ui { font-family: var(--font-family); font-size: 0.95rem; }
+
+.value-bar {
+  height: 8px; /* 条条变细 */
+  width: 100%;
+  background: var(--bg-body);
+  border-radius: 99px;
+  margin-top: 4px;
+  opacity: 0.5;
+}
+
+.span-2 { grid-column: span 2; }
+.col-full { grid-column: span 2; }
+.sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-body) 25%, rgba(0,0,0,0.05) 50%, var(--bg-body) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent !important;
+  border-radius: 6px;
+  min-height: 1em;
+  display: inline-block;
+}
+@media (prefers-color-scheme: dark) {
+  .skeleton { background: linear-gradient(90deg, #171923 25%, #2d3748 50%, #171923 75%); }
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.9);
+  background: var(--text-main); color: var(--bg-card);
+  padding: 10px 24px; border-radius: 99px;
+  font-weight: 600; font-size: 0.85rem;
+  opacity: 0; visibility: hidden; transition: 0.3s;
+  display: flex; gap: 8px; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+.toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .span-2 { grid-column: span 2; }
+  .col-full { grid-column: span 2; }
+  .sub-grid { grid-template-columns: 1fr; }
+  #ipAddr { font-size: 2.8rem; }
+}
+@media (max-width: 480px) {
+  .hero-card { padding: 30px 20px; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .span-2, .col-full { grid-column: span 1; }
+  .sub-grid { gap: 16px; }
 }
 </style>
 </head>
 <body>
-<div class="main">
-  <div class="ip-card">
-    <div id="flagSkeleton" class="flag-skeleton"></div>
-    <img id="ip-flag" class="flag-img" alt="Country Flag"/>
-    <div class="info">
-      <div id="ipAddr" class="ip-big-value skeleton"></div>
-      <div id="ipPlace" class="ip-place skeleton"></div>
+
+<div class="container">
+  
+  <div class="controls-header">
+    <button class="btn-circle active lang-btn" data-lang="en">EN</button>
+    <button class="btn-circle lang-btn" data-lang="zh">中</button>
+    <button id="refreshBtn" class="btn-circle"><i class="fa-solid fa-rotate-right"></i></button>
+  </div>
+
+  <div class="hero-card">
+    <div class="flag-container">
+      <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
+      <img id="ip-flag" class="flag-img" alt="Flag">
+    </div>
+    <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
+    <div id="ipAddr" class="skeleton" onclick="copyText(this)" style="min-width: 200px; height: 3.5rem;"></div>
+    
+    <div class="location-pill">
+      <i class="fa-solid fa-location-dot"></i>
+      <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
     </div>
   </div>
-  <div class="card">
-    <div class="title" data-zh="详细网络信息" data-en="Network Details"></div>
-    <div class="row">
-      <div class="cell"><div class="label" data-zh="IPv6 地址" data-en="IPv6 Address"></div><div id="ipv6" class="value"></div></div>
-      <div class="cell"><div class="label" data-zh="主机名" data-en="Hostname"></div><div id="hostname" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="国家" data-en="Country"></div><div id="country" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="自治系统（ASN）" data-en="ASN"></div><div id="asn" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="运营商/组织" data-en="ISP / Organization"></div><div id="org" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="大洲" data-en="Continent"></div><div id="continent" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="坐标" data-en="Coordinates"></div><div id="coords" class="value skeleton"></div></div>
-      <div class="cell"><div class="label" data-zh="邮编" data-en="Postal Code"></div><div id="postal" class="value skeleton"></div></div>
+
+  <div class="bento-grid">
+    
+    <div class="card span-2" onclick="copyText(document.getElementById('ipv6'))">
+      <div class="info-row">
+        <div class="card-label"><i class="fa-brands fa-connectdevelop"></i> <span data-zh="IPv6 地址" data-en="IPv6 Address">IPv6 Address</span></div>
+        <div id="ipv6" class="card-value skeleton"></div>
+      </div>
+      <div class="value-bar"></div>
     </div>
+
+    <div class="card span-2" onclick="copyText(document.getElementById('hostname'))">
+      <div class="info-row">
+        <div class="card-label"><i class="fa-solid fa-server"></i> <span data-zh="主机名" data-en="Hostname">Hostname</span></div>
+        <div id="hostname" class="card-value skeleton"></div>
+      </div>
+      <div class="value-bar"></div>
+    </div>
+
+    <div class="card col-full" onclick="copyText(document.getElementById('org'))">
+      <div class="info-row">
+        <div class="card-label"><i class="fa-solid fa-building"></i> <span data-zh="运营商 / 组织" data-en="ISP / Organization">ISP / Organization</span></div>
+        <div id="org" class="card-value text-ui skeleton"></div>
+      </div>
+      <div class="value-bar"></div>
+    </div>
+
+    <div class="sub-grid col-full">
+      <div class="card" onclick="copyText(document.getElementById('asn'))">
+        <div class="card-label"><i class="fa-solid fa-fingerprint"></i> <span data-zh="ASN" data-en="ASN">ASN</span></div>
+        <div id="asn" class="card-value skeleton"></div>
+        <div class="value-bar"></div>
+      </div>
+      <div class="card" onclick="copyText(document.getElementById('country'))">
+        <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
+        <div id="country" class="card-value text-ui skeleton"></div>
+        <div class="value-bar"></div>
+      </div>
+    </div>
+
+    <div class="sub-grid col-full">
+      <div class="card" onclick="copyText(document.getElementById('continent'))">
+        <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
+        <div id="continent" class="card-value text-ui skeleton"></div>
+        <div class="value-bar"></div>
+      </div>
+      <div class="card" onclick="copyText(document.getElementById('postal'))">
+        <div class="card-label"><i class="fa-solid fa-map-pin"></i> <span data-zh="邮编" data-en="Postal Code">Postal Code</span></div>
+        <div id="postal" class="card-value skeleton"></div>
+        <div class="value-bar"></div>
+      </div>
+    </div>
+
+    <div class="card col-full">
+      <div class="info-row">
+        <div class="card-label"><i class="fa-solid fa-compass"></i> <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span></div>
+        <div id="coords" class="card-value skeleton"></div>
+      </div>
+      <div class="value-bar"></div>
+      <div id="mapContainer" style="margin-top: 8px;"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- 语言切换 -->
-<div class="lang-controls">
-  <button class="lang-btn" data-lang="zh">中</button>
-  <button class="lang-btn active" data-lang="en">EN</button>
-</div>
-
-<!-- 刷新按钮 -->
-<button id="refreshBtn" class="refresh-fab" aria-label="Refresh">
-  <i class="fa fa-refresh"></i>
-</button>
-
-<!-- Toast 提示弹窗（磨砂质感） -->
-<div id="toast" class="toast"><i class="fa fa-check"></i> <span data-zh="已复制 IP 地址！" data-en="IP Address Copied!"></span></div>
+<div id="toast" class="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg">Copied</span></div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.querySelector('#toast span')};
+// === 保留原版稳健数据逻辑 ===
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),mapBox:document.getElementById('mapContainer'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.getElementById('toastMsg')};
 let lastIpv6='';
 let currentLang = 'en';
 
-// 刷新按钮
-document.getElementById('refreshBtn').addEventListener('click', () => location.reload());
+document.getElementById('refreshBtn').addEventListener('click', () => {
+    localStorage.removeItem('ip_geo_cache');
+    location.reload();
+});
 
-// 语言切换逻辑
 const langBtns = document.querySelectorAll('.lang-btn');
 function switchLang(lang){
   currentLang = lang;
   document.querySelectorAll('[data-zh]').forEach(el=>{
     el.textContent = el.getAttribute(`data-${lang}`);
   });
-  document.documentElement.lang = lang;
   langBtns.forEach(btn=>btn.classList.toggle('active',btn.dataset.lang===lang));
-  els.toastMsg.textContent = els.toastMsg.getAttribute(`data-${lang}`);
-  if(els.coords.dataset.lat && els.coords.dataset.lon){
-    renderCoords(els.coords.dataset.lat, els.coords.dataset.lon);
-  }
+  els.toastMsg.textContent = lang === 'zh' ? '已复制' : 'Copied';
+  if(els.coords.dataset.lat){ renderCoords(els.coords.dataset.lat, els.coords.dataset.lon); }
 }
-switchLang('en');
 langBtns.forEach(btn=>btn.addEventListener('click',()=>switchLang(btn.dataset.lang)));
 
-async function copyIP(){
-  const ip = els.ipAddr.textContent.trim();
-  if(ip && ip !== 'Unknown' && ip !== '未知'){
-    try{
-      await navigator.clipboard.writeText(ip);
-      toast();
-    }catch{
-      const range = document.createRange();
-      range.selectNode(els.ipAddr);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-      try{
-        document.execCommand('copy');
-        toast();
-      }catch{}
-      window.getSelection().removeAllRanges();
-    }
+async function copyText(el){
+  const text = el.innerText.trim();
+  if(text && text !== 'Unknown' && text !== 'Not Detected' && text !== 'N/A'){
+    try{ await navigator.clipboard.writeText(text); showToast(); } catch{}
   }
 }
-
-// 点击 或 长按 复制 IP
-els.ipAddr.addEventListener('click', copyIP);
-els.ipAddr.addEventListener('touchstart', e => e.preventDefault());
-els.ipAddr.addEventListener('touchend', e => {e.preventDefault(); copyIP();});
-els.ipAddr.addEventListener('contextmenu', e => e.preventDefault());
-
-function toast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
-
+function showToast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
 function rmSk(el){el.classList.remove('skeleton')}
-function showFlag(){els.flagSk.style.display='none';els.flag.style.display='block';els.flag.classList.add('loaded')}
+function showFlag(){els.flagSk.style.display='none';els.flag.classList.add('loaded')}
 
-// localStorage 缓存 Geo 数据（10分钟有效期）
 const CACHE_KEY = 'ip_geo_cache';
 const CACHE_TTL = 10 * 60 * 1000;
 
 async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
 async function getIPs(){const [v4,v6]=await Promise.allSettled([fetchT('https://api.ipify.org?format=json'),fetchT('https://api64.ipify.org?format=json')]);const ipv4=v4.status==='fulfilled'?v4.value.ip||v4.value.text||'Unknown':'Unknown';const ipv6=v6.status==='fulfilled'?v6.value.ip||v6.value.text||'':'Not Detected';if(ipv6&&ipv6!==ipv4)lastIpv6=ipv6;return{ipv4,ipv6:ipv6||lastIpv6||'Not Detected'}}
+
 async function getGeo(ip){
   const cache = localStorage.getItem(CACHE_KEY);
   if(cache){
     const {data, timestamp, cachedIp} = JSON.parse(cache);
-    if(cachedIp === ip && Date.now() - timestamp < CACHE_TTL){
-      return data;
-    }
+    if(cachedIp === ip && Date.now() - timestamp < CACHE_TTL){ return data; }
   }
   const apis=[`https://ipwho.is/${ip?encodeURIComponent(ip):''}`,`https://ipapi.co/${ip?encodeURIComponent(ip)+'/':''}json/`,'https://ipinfo.io/json'];
   for(const u of apis){
@@ -291,20 +405,21 @@ async function getGeo(ip){
 
 function renderCoords(lat, lon){
   const mapUrl = currentLang === 'zh' 
-    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=您的位置` 
+    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=位置` 
     : `https://www.google.com/maps?q=${lat},${lon}`;
-  els.coords.innerHTML = `<a href="${mapUrl}" target="_blank" class="coords-link">${lat}, ${lon}</a>`;
-  els.coords.dataset.lat = lat;
-  els.coords.dataset.lon = lon;
+  els.coords.textContent = `${lat}, ${lon}`;
+  els.mapBox.innerHTML = `<a href="${mapUrl}" target="_blank" style="color:var(--text-label);text-decoration:none;font-size:0.85rem;font-weight:600;display:inline-flex;align-items:center;gap:4px">Open Map <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
+  els.coords.dataset.lat = lat; els.coords.dataset.lon = lon;
 }
 
 function render(ip,geo){
   rmSk(els.ipAddr);
   if(!geo){rmSk(els.ipPlace);els.ipPlace.textContent=currentLang==='zh'?'未知地区':'Unknown Location';els.flagSk.style.display='none';return}
-  const place=(geo.country_name||geo.country||'')+(geo.city?' '+geo.city:'')+(geo.region_name||geo.region?' · '+(geo.region_name||geo.region):'');
-  els.ipPlace.textContent=place|| (currentLang==='zh'?'未知地区':'Unknown Location');rmSk(els.ipPlace);
-  let code=(geo.country_code||geo.country||'').toLowerCase();if(code.length===2){els.flag.src=`https://cdn.jsdelivr.net/npm/flag-icon-css@4.1.7/flags/4x3/${code}.svg`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
-  [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal].forEach(rmSk);
+  const place=(geo.country_name||geo.country||'')+(geo.city?' · '+geo.city:'');
+  els.ipPlace.innerHTML = place || (currentLang==='zh'?'未知地区':'Unknown Location'); rmSk(els.ipPlace);
+  let code=(geo.country_code||geo.country||'').toLowerCase();
+  if(code.length===2){els.flag.src=`https://flagcdn.com/w160/${code}.png`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
+  [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal,els.ipv6].forEach(rmSk);
   els.ipv6.textContent=geo.ipv6||lastIpv6|| (currentLang==='zh'?'未检测到':'Not Detected');
   els.country.textContent=geo.country_name||geo.country|| (currentLang==='zh'?'未知':'Unknown');
   const asnNum=geo.connection?.asn||geo.asn||'';
@@ -312,11 +427,7 @@ function render(ip,geo){
   els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
   els.continent.textContent=geo.continent_name||geo.continent|| (currentLang==='zh'?'未知':'Unknown');
   const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
-  if(lat&&lon){
-    renderCoords(lat, lon);
-  }else{
-    els.coords.textContent=currentLang==='zh'?'未知':'Unknown';
-  }
+  if(lat&&lon){renderCoords(lat, lon);}else{els.coords.textContent=currentLang==='zh'?'未知':'Unknown';}
   els.postal.textContent=geo.postal||geo.postal_code|| (currentLang==='zh'?'未知':'Unknown');
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
