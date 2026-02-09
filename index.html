@@ -14,32 +14,33 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%232d3748%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 dy=%22.35em%22>IP</text></svg>">
 
 <style>
-/* --- Compact Soft UI System --- */
+/* --- 优化后的视觉系统 --- */
 :root {
   --bg-body: #f3f4f6;
   --bg-card: #ffffff;
+  --bg-inner: #f8fafc; /* 新增内部容器色 */
   --text-main: #1a202c;
-  --text-label: #a0aec0;
+  --text-label: #718096;
   --text-value: #2d3748;
   --accent: #1a202c;
   
-  /* 阴影调小，更精致 */
-  --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.05), 0 5px 10px -5px rgba(0,0,0,0.02);
-  --shadow-hover: 0 15px 30px -8px rgba(0,0,0,0.08);
+  --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.04), 0 4px 10px -5px rgba(0,0,0,0.02);
+  --shadow-hover: 0 20px 35px -10px rgba(0,0,0,0.08);
   
-  --radius: 24px; /* 圆角稍微减小 */
+  --radius: 24px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-body: #171923;
-    --bg-card: #2d3748;
-    --text-main: #f7fafc;
-    --text-label: #a0aec0;
-    --text-value: #edf2f7;
+    --bg-body: #0f172a;
+    --bg-card: #1e293b;
+    --bg-inner: #334155;
+    --text-main: #f8fafc;
+    --text-label: #94a3b8;
+    --text-value: #e2e8f0;
     --accent: #ffffff;
-    --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.3);
+    --shadow-card: 0 10px 30px -10px rgba(0,0,0,0.5);
   }
 }
 
@@ -52,18 +53,16 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  /* 减小页面内边距 */
   padding: 30px 16px; 
   transition: background 0.3s;
 }
 
 .container {
   width: 100%;
-  /* 减小最大宽度，更紧凑 */
   max-width: 800px; 
   display: flex;
   flex-direction: column;
-  gap: 16px; /* 减小间距 */
+  gap: 16px;
 }
 
 /* Controls */
@@ -71,23 +70,24 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-bottom: -8px;
+  margin-bottom: -4px;
   z-index: 10;
 }
 .btn-circle {
-  width: 36px; height: 36px; /* 按钮变小 */
-  border-radius: 50%;
+  width: 36px; height: 36px;
+  border-radius: 10px;
   background: var(--bg-card);
   color: var(--text-main);
-  border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
   font-size: 0.8rem;
   transition: all 0.2s;
 }
-.btn-circle:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+@media (prefers-color-scheme: dark) { .btn-circle { border-color: rgba(255,255,255,0.1); } }
+.btn-circle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .btn-circle.active { background: var(--text-main); color: var(--bg-body); }
 
 /* --- Hero Card --- */
@@ -95,7 +95,6 @@ body {
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
-  /* 减小内边距 */
   padding: 40px 30px; 
   display: flex;
   flex-direction: column;
@@ -103,12 +102,13 @@ body {
   text-align: center;
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .flag-container {
-  width: 80px; height: 60px; /* 国旗变小 */
+  width: 80px; height: 60px;
   border-radius: 12px;
-  background: var(--bg-body);
+  background: var(--bg-inner);
   margin-bottom: 16px;
   display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
@@ -127,7 +127,6 @@ body {
 }
 
 #ipAddr {
-  /* 缩小 IP 字号 */
   font-size: clamp(2.2rem, 5vw, 3.5rem); 
   font-weight: 800;
   color: var(--text-main);
@@ -135,92 +134,117 @@ body {
   margin-bottom: 16px;
   letter-spacing: -0.03em;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
-#ipAddr:active { opacity: 0.5; }
+#ipAddr:active { opacity: 0.5; transform: scale(0.98); }
 
 .location-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-body);
-  padding: 8px 20px; /* 胶囊变小 */
+  background: var(--bg-inner);
+  padding: 8px 20px;
   border-radius: 99px;
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--text-value);
 }
-.location-pill i { font-size: 0.9em; color: var(--text-main); }
 
-/* --- Bento Grid --- */
+/* --- Bento Grid 优化 --- */
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px; /* 减小网格间距 */
+  gap: 16px;
 }
 
 .card {
   background: var(--bg-card);
-  border-radius: 20px; /* 圆角微调 */
+  border-radius: 20px;
   box-shadow: var(--shadow-card);
-  padding: 20px; /* 减小卡片内边距 */
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
-  transition: transform 0.2s;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.card:active { transform: scale(0.98); }
 
-.info-row { display: flex; flex-direction: column; gap: 6px; }
+.info-row { display: flex; flex-direction: column; gap: 8px; }
 
 .card-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--text-label);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.card-label i { font-size: 1.1em; color: var(--text-label); opacity: 0.8; }
+
+/* 统一图标背景框 */
+.card-label i {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-inner);
+  border-radius: 7px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  opacity: 0.9;
+}
 
 .card-value {
-  font-family: monospace;
-  font-size: 0.9rem; /* 字号微调 */
+  font-family: var(--font-family); /* 优化字体可读性 */
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-value);
   word-break: break-all;
   line-height: 1.4;
 }
-.text-ui { font-family: var(--font-family); font-size: 0.95rem; }
 
 .value-bar {
-  height: 8px; /* 条条变细 */
+  height: 4px; /* 极简线条 */
   width: 100%;
-  background: var(--bg-body);
+  background: var(--bg-inner);
   border-radius: 99px;
-  margin-top: 4px;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .span-2 { grid-column: span 2; }
 .col-full { grid-column: span 2; }
 .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
+/* 地图按钮优化样式 */
+.map-btn-link {
+  color: var(--text-label);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-inner);
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+.map-btn-link:hover { background: var(--text-main); color: var(--bg-body); }
+
 /* Skeleton */
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-body) 25%, rgba(0,0,0,0.05) 50%, var(--bg-body) 75%);
+  background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(0,0,0,0.05) 50%, var(--bg-inner) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   color: transparent !important;
   border-radius: 6px;
-  min-height: 1em;
-  display: inline-block;
+  min-height: 1.2em;
 }
 @media (prefers-color-scheme: dark) {
   .skeleton { background: linear-gradient(90deg, #171923 25%, #2d3748 50%, #171923 75%); }
@@ -242,10 +266,7 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
   .bento-grid { grid-template-columns: repeat(2, 1fr); }
-  .span-2 { grid-column: span 2; }
-  .col-full { grid-column: span 2; }
-  .sub-grid { grid-template-columns: 1fr; }
-  #ipAddr { font-size: 2.8rem; }
+  .span-2, .col-full { grid-column: span 2; }
 }
 @media (max-width: 480px) {
   .hero-card { padding: 30px 20px; }
@@ -300,7 +321,7 @@ body {
     <div class="card col-full" onclick="copyText(document.getElementById('org'))">
       <div class="info-row">
         <div class="card-label"><i class="fa-solid fa-building"></i> <span data-zh="运营商 / 组织" data-en="ISP / Organization">ISP / Organization</span></div>
-        <div id="org" class="card-value text-ui skeleton"></div>
+        <div id="org" class="card-value skeleton"></div>
       </div>
       <div class="value-bar"></div>
     </div>
@@ -313,7 +334,7 @@ body {
       </div>
       <div class="card" onclick="copyText(document.getElementById('country'))">
         <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
-        <div id="country" class="card-value text-ui skeleton"></div>
+        <div id="country" class="card-value skeleton"></div>
         <div class="value-bar"></div>
       </div>
     </div>
@@ -321,7 +342,7 @@ body {
     <div class="sub-grid col-full">
       <div class="card" onclick="copyText(document.getElementById('continent'))">
         <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
-        <div id="continent" class="card-value text-ui skeleton"></div>
+        <div id="continent" class="card-value skeleton"></div>
         <div class="value-bar"></div>
       </div>
       <div class="card" onclick="copyText(document.getElementById('postal'))">
@@ -346,7 +367,7 @@ body {
 <div id="toast" class="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg">Copied</span></div>
 
 <script>
-// === 保留原版稳健数据逻辑 ===
+/* 核心逻辑完全保留，JS部分未作任何逻辑变动 */
 const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),mapBox:document.getElementById('mapContainer'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.getElementById('toastMsg')};
 let lastIpv6='';
 let currentLang = 'en';
@@ -408,7 +429,8 @@ function renderCoords(lat, lon){
     ? `https://uri.amap.com/marker?position=${lon},${lat}&name=位置` 
     : `https://www.google.com/maps?q=${lat},${lon}`;
   els.coords.textContent = `${lat}, ${lon}`;
-  els.mapBox.innerHTML = `<a href="${mapUrl}" target="_blank" style="color:var(--text-label);text-decoration:none;font-size:0.85rem;font-weight:600;display:inline-flex;align-items:center;gap:4px">Open Map <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
+  /* 此处使用了 CSS 类名 map-btn-link 以保持美观 */
+  els.mapBox.innerHTML = `<a href="${mapUrl}" target="_blank" class="map-btn-link">Open Map <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
   els.coords.dataset.lat = lat; els.coords.dataset.lon = lon;
 }
 
