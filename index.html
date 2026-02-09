@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>IP Insight | Compact</title>
+<title>IP Insight | Monochrome</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
 <link rel="preconnect" href="https://ipapi.co">
@@ -11,36 +11,39 @@
 <link rel="preconnect" href="https://dns.google">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%232d3748%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 dy=%22.35em%22>IP</text></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23000%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 dy=%22.35em%22>IP</text></svg>">
 
 <style>
-/* --- 优化后的视觉系统 --- */
+/* --- 极致黑白视觉系统 (Monochrome) --- */
 :root {
-  --bg-body: #f3f4f6;
-  --bg-card: #ffffff;
-  --bg-inner: #f8fafc; /* 新增内部容器色 */
-  --text-main: #1a202c;
-  --text-label: #718096;
-  --text-value: #2d3748;
-  --accent: #1a202c;
+  /* 白天模式：纯净白/灰/黑 */
+  --bg-body: #ffffff;
+  --bg-card: #f9f9f9;
+  --bg-inner: #eeeeee;
+  --text-main: #000000;
+  --text-label: #666666;
+  --text-value: #111111;
   
-  --shadow-card: 0 10px 25px -5px rgba(0,0,0,0.04), 0 4px 10px -5px rgba(0,0,0,0.02);
-  --shadow-hover: 0 20px 35px -10px rgba(0,0,0,0.08);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
   
-  --radius: 24px;
+  --radius: 20px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-body: #0f172a;
-    --bg-card: #1e293b;
-    --bg-inner: #334155;
-    --text-main: #f8fafc;
-    --text-label: #94a3b8;
-    --text-value: #e2e8f0;
-    --accent: #ffffff;
-    --shadow-card: 0 10px 30px -10px rgba(0,0,0,0.5);
+    /* 夜间模式：纯黑/深灰/白 */
+    --bg-body: #000000;      /* 纯黑背景 */
+    --bg-card: #111111;      /* 极深灰卡片 */
+    --bg-inner: #222222;     /* 炭灰内部容器 */
+    --text-main: #ffffff;    /* 纯白文字 */
+    --text-label: #888888;   /* 中灰标签 */
+    --text-value: #f0f0f0;   /* 亮灰数值 */
+    
+    /* 夜间模式改用细微白边框代替阴影，增强轮廓感 */
+    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.15);
+    --shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -54,7 +57,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 30px 16px; 
-  transition: background 0.3s;
+  transition: background 0.3s, color 0.3s;
 }
 
 .container {
@@ -78,7 +81,7 @@ body {
   border-radius: 10px;
   background: var(--bg-card);
   color: var(--text-main);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: none;
   box-shadow: var(--shadow-card);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
@@ -86,9 +89,8 @@ body {
   font-size: 0.8rem;
   transition: all 0.2s;
 }
-@media (prefers-color-scheme: dark) { .btn-circle { border-color: rgba(255,255,255,0.1); } }
 .btn-circle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-.btn-circle.active { background: var(--text-main); color: var(--bg-body); }
+.btn-circle.active { background: var(--text-main); color: var(--bg-body); box-shadow: none; }
 
 /* --- Hero Card --- */
 .hero-card {
@@ -102,7 +104,7 @@ body {
   text-align: center;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: box-shadow 0.3s;
 }
 
 .flag-container {
@@ -111,7 +113,6 @@ body {
   background: var(--bg-inner);
   margin-bottom: 16px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
   overflow: hidden;
 }
 .flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
@@ -134,9 +135,9 @@ body {
   margin-bottom: 16px;
   letter-spacing: -0.03em;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
-#ipAddr:active { opacity: 0.5; transform: scale(0.98); }
+#ipAddr:active { opacity: 0.5; }
 
 .location-pill {
   display: inline-flex;
@@ -150,7 +151,7 @@ body {
   color: var(--text-value);
 }
 
-/* --- Bento Grid 优化 --- */
+/* --- Bento Grid --- */
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -161,16 +162,16 @@ body {
   background: var(--bg-card);
   border-radius: 20px;
   box-shadow: var(--shadow-card);
-  padding: 20px;
+  padding: 24px 20px; /* 稍微增加上下内边距以平衡视觉 */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center; /* 内容垂直居中 */
+  gap: 8px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-height: 100px; /* 确保最小高度统一 */
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .card:active { transform: scale(0.98); }
@@ -188,7 +189,7 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* 统一图标背景框 */
+/* 图标背景统一 */
 .card-label i {
   width: 26px; height: 26px;
   display: flex; align-items: center; justify-content: center;
@@ -196,33 +197,26 @@ body {
   border-radius: 7px;
   font-size: 0.85rem;
   color: var(--text-main);
-  opacity: 0.9;
 }
 
 .card-value {
-  font-family: var(--font-family); /* 优化字体可读性 */
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-value);
   word-break: break-all;
   line-height: 1.4;
+  margin-top: 4px; /* 增加一点与标签的间距 */
 }
 
-.value-bar {
-  height: 4px; /* 极简线条 */
-  width: 100%;
-  background: var(--bg-inner);
-  border-radius: 99px;
-  opacity: 0.6;
-}
+/* value-bar 已删除 */
 
 .span-2 { grid-column: span 2; }
 .col-full { grid-column: span 2; }
 .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-/* 地图按钮优化样式 */
+/* 地图按钮 - 黑白反差风格 */
 .map-btn-link {
-  color: var(--text-label);
+  color: var(--text-main);
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 700;
@@ -230,16 +224,20 @@ body {
   align-items: center;
   gap: 6px;
   background: var(--bg-inner);
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 8px;
   margin-top: 4px;
   transition: all 0.2s;
+  border: 1px solid transparent;
 }
-.map-btn-link:hover { background: var(--text-main); color: var(--bg-body); }
+.map-btn-link:hover { 
+  background: var(--text-main); 
+  color: var(--bg-body); 
+}
 
-/* Skeleton */
+/* Skeleton Loading - Monochrome */
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(0,0,0,0.05) 50%, var(--bg-inner) 75%);
+  background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(128,128,128,0.1) 50%, var(--bg-inner) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   color: transparent !important;
@@ -247,18 +245,21 @@ body {
   min-height: 1.2em;
 }
 @media (prefers-color-scheme: dark) {
-  .skeleton { background: linear-gradient(90deg, #171923 25%, #2d3748 50%, #171923 75%); }
+  .skeleton { 
+    background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); 
+  }
 }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 /* Toast */
 .toast {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.9);
-  background: var(--text-main); color: var(--bg-card);
+  background: var(--text-main); color: var(--bg-body);
   padding: 10px 24px; border-radius: 99px;
   font-weight: 600; font-size: 0.85rem;
   opacity: 0; visibility: hidden; transition: 0.3s;
-  display: flex; gap: 8px; align-items: center; box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  display: flex; gap: 8px; align-items: center; 
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   z-index: 100;
 }
 .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
@@ -307,7 +308,6 @@ body {
         <div class="card-label"><i class="fa-brands fa-connectdevelop"></i> <span data-zh="IPv6 地址" data-en="IPv6 Address">IPv6 Address</span></div>
         <div id="ipv6" class="card-value skeleton"></div>
       </div>
-      <div class="value-bar"></div>
     </div>
 
     <div class="card span-2" onclick="copyText(document.getElementById('hostname'))">
@@ -315,7 +315,6 @@ body {
         <div class="card-label"><i class="fa-solid fa-server"></i> <span data-zh="主机名" data-en="Hostname">Hostname</span></div>
         <div id="hostname" class="card-value skeleton"></div>
       </div>
-      <div class="value-bar"></div>
     </div>
 
     <div class="card col-full" onclick="copyText(document.getElementById('org'))">
@@ -323,19 +322,16 @@ body {
         <div class="card-label"><i class="fa-solid fa-building"></i> <span data-zh="运营商 / 组织" data-en="ISP / Organization">ISP / Organization</span></div>
         <div id="org" class="card-value skeleton"></div>
       </div>
-      <div class="value-bar"></div>
     </div>
 
     <div class="sub-grid col-full">
       <div class="card" onclick="copyText(document.getElementById('asn'))">
         <div class="card-label"><i class="fa-solid fa-fingerprint"></i> <span data-zh="ASN" data-en="ASN">ASN</span></div>
         <div id="asn" class="card-value skeleton"></div>
-        <div class="value-bar"></div>
       </div>
       <div class="card" onclick="copyText(document.getElementById('country'))">
         <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
         <div id="country" class="card-value skeleton"></div>
-        <div class="value-bar"></div>
       </div>
     </div>
 
@@ -343,12 +339,10 @@ body {
       <div class="card" onclick="copyText(document.getElementById('continent'))">
         <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
         <div id="continent" class="card-value skeleton"></div>
-        <div class="value-bar"></div>
       </div>
       <div class="card" onclick="copyText(document.getElementById('postal'))">
         <div class="card-label"><i class="fa-solid fa-map-pin"></i> <span data-zh="邮编" data-en="Postal Code">Postal Code</span></div>
         <div id="postal" class="card-value skeleton"></div>
-        <div class="value-bar"></div>
       </div>
     </div>
 
@@ -357,7 +351,6 @@ body {
         <div class="card-label"><i class="fa-solid fa-compass"></i> <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span></div>
         <div id="coords" class="card-value skeleton"></div>
       </div>
-      <div class="value-bar"></div>
       <div id="mapContainer" style="margin-top: 8px;"></div>
     </div>
 
@@ -367,7 +360,6 @@ body {
 <div id="toast" class="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg">Copied</span></div>
 
 <script>
-/* 核心逻辑完全保留，JS部分未作任何逻辑变动 */
 const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),mapBox:document.getElementById('mapContainer'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.getElementById('toastMsg')};
 let lastIpv6='';
 let currentLang = 'en';
@@ -429,7 +421,6 @@ function renderCoords(lat, lon){
     ? `https://uri.amap.com/marker?position=${lon},${lat}&name=位置` 
     : `https://www.google.com/maps?q=${lat},${lon}`;
   els.coords.textContent = `${lat}, ${lon}`;
-  /* 此处使用了 CSS 类名 map-btn-link 以保持美观 */
   els.mapBox.innerHTML = `<a href="${mapUrl}" target="_blank" class="map-btn-link">Open Map <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
   els.coords.dataset.lat = lat; els.coords.dataset.lon = lon;
 }
