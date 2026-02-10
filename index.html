@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
 <title>IP.WWZ.iM | Insight</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
@@ -14,7 +15,6 @@
 <style>
 /* --- 极致黑白视觉系统 (Soft & Airy) --- */
 :root {
-  /* 背景色：更亮、更轻盈 */
   --bg-body: #f5f7fa; 
   --bg-card: #ffffff;
   --bg-inner: #f8f9fb;
@@ -24,7 +24,6 @@
   --text-value: #1f1f1f;
   --text-dim: #a3a3a3;
   
-  /* 阴影：极柔和、空气感 */
   --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.02), 0 4px 16px -4px rgba(0, 0, 0, 0.02);
   --shadow-hover: 0 8px 24px -6px rgba(0, 0, 0, 0.04), 0 4px 8px -2px rgba(0, 0, 0, 0.01);
   
@@ -53,6 +52,14 @@ html.dark-mode {
     --status-gray: #3a3a3c;
 }
 
+/* 2. Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+html.dark-mode ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+html.dark-mode ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
 
 body {
@@ -74,7 +81,7 @@ body {
   gap: 20px;
 }
 
-/* --- Header Section --- */
+/* --- Header --- */
 .header-bar {
   display: flex;
   justify-content: space-between;
@@ -89,7 +96,6 @@ body {
   font-size: 1.35rem;
   letter-spacing: -0.03em;
   color: var(--text-main);
-  text-decoration: none;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -100,10 +106,7 @@ body {
 .brand-logo:hover { opacity: 0.7; }
 .brand-logo span { opacity: 0.4; font-weight: 400; font-size: 0.9em; margin: 0 1px; }
 
-.controls-group {
-  display: flex;
-  gap: 10px;
-}
+.controls-group { display: flex; gap: 10px; }
 
 .btn-circle {
   width: 38px; height: 38px;
@@ -138,16 +141,10 @@ body {
   justify-content: center;
   cursor: pointer;
 }
-
 .hero-card:hover { box-shadow: var(--shadow-hover); }
-
-.hero-card:hover .hero-map-bg { 
-    opacity: 0.35; 
-    transform: scale(1.03) translateY(0); 
-}
+.hero-card:hover .hero-map-bg { opacity: 0.35; transform: scale(1.03) translateY(0); }
 html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.5; }
 
-/* 背景地图层 */
 .hero-map-bg {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -155,38 +152,19 @@ html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.5; }
     pointer-events: none; 
     opacity: 0; 
     transform: scale(1.15) translateY(40px); 
-    
-    transition: 
-        opacity 1.2s ease-out, 
-        transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
-    
+    transition: opacity 1.2s ease-out, transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
     -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 100%);
     mask-image: linear-gradient(to bottom, transparent 25%, black 100%);
-    
     filter: grayscale(100%) contrast(1.05) brightness(1.05); 
     will-change: transform, opacity; 
 }
-
-.hero-map-bg.loaded { 
-    opacity: 0.15; 
-    transform: scale(1) translateY(0); 
-}
-
-html.dark-mode .hero-map-bg {
-    filter: invert(95%) hue-rotate(180deg) grayscale(20%) contrast(1.1) brightness(0.8);
-}
+.hero-map-bg.loaded { opacity: 0.15; transform: scale(1) translateY(0); }
+html.dark-mode .hero-map-bg { filter: invert(95%) hue-rotate(180deg) grayscale(20%) contrast(1.1) brightness(0.8); }
 html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
 
-/* 内容层 */
 .hero-content {
-    position: relative;
-    z-index: 2;
-    padding: 48px 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    pointer-events: none; 
+    position: relative; z-index: 2; padding: 48px 30px;
+    display: flex; flex-direction: column; align-items: center; width: 100%; pointer-events: none; 
 }
 .hero-content > * { pointer-events: auto; }
 
@@ -207,105 +185,36 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
 .flag-img.loaded { opacity: 1; }
 
 .label-sup {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--text-label);
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  background: var(--bg-card); 
-  padding: 6px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-label); text-transform: uppercase;
+  margin-bottom: 12px; background: var(--bg-card); padding: 6px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 #ipAddr {
-  font-size: clamp(2.5rem, 6vw, 4.2rem); 
-  font-weight: 800;
-  color: var(--text-main);
-  line-height: 1.1;
-  margin-bottom: 24px;
-  letter-spacing: -0.03em;
-  cursor: pointer; 
-  transition: color 0.3s;
+  font-size: clamp(2.5rem, 6vw, 4.2rem); font-weight: 800; color: var(--text-main); line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.03em; cursor: pointer; transition: color 0.3s;
 }
 #ipAddr:active { opacity: 0.7; transform: scale(0.98); }
 
 .location-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg-inner);
-  padding: 12px 24px;
-  border-radius: 99px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  color: var(--text-value);
-  transition: background 0.3s, color 0.3s;
-  border: 1px solid rgba(0,0,0,0.03);
+  display: inline-flex; align-items: center; gap: 8px; background: var(--bg-inner); padding: 12px 24px; border-radius: 99px; font-weight: 500; font-size: 0.95rem; color: var(--text-value); transition: background 0.3s, color 0.3s; border: 1px solid rgba(0,0,0,0.03);
 }
 .location-pill svg { width: 16px; height: 16px; fill: currentColor; opacity: 0.7; }
 
 /* --- Bento Grid --- */
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  grid-auto-flow: dense; 
-}
+.bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; grid-auto-flow: dense; }
 
 .card {
-  background: var(--bg-card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  min-height: 120px;
-  border: 1px solid rgba(0,0,0,0.01);
+  background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 24px;
+  display: flex; flex-direction: column; justify-content: center; gap: 10px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative; overflow: hidden; cursor: pointer; min-height: 120px; border: 1px solid rgba(0,0,0,0.01);
 }
 .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .card:active { transform: scale(0.98); }
 
 .info-row { display: flex; flex-direction: column; gap: 8px; }
-
-.card-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-label);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.card-icon-box {
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg-inner);
-  border-radius: 10px;
-  color: var(--text-main);
-  transition: background 0.3s, color 0.3s;
-}
+.card-label { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; font-weight: 700; color: var(--text-label); text-transform: uppercase; letter-spacing: 0.05em; }
+.card-icon-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--bg-inner); border-radius: 10px; color: var(--text-main); transition: background 0.3s, color 0.3s; }
 .card-icon-box svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
-
-.card-value {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-value);
-  word-break: break-all;
-  line-height: 1.5;
-  margin-top: 2px;
-  transition: color 0.2s;
-}
-.card-value.dim { color: var(--text-dim); font-weight: 500; }
+.card-value { font-size: 0.95rem; font-weight: 600; color: var(--text-value); word-break: break-all; line-height: 1.5; margin-top: 2px; transition: color 0.2s; }
 .card-value.copied { color: var(--status-green) !important; }
 
 /* Network List */
@@ -320,87 +229,47 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
 .latency-name { display: flex; align-items: center; gap: 8px; color: var(--text-label); }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-gray); transition: background 0.3s; }
 .status-dot.pulse { animation: pulse 2s infinite; }
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
 .latency-ms { font-family: 'Inter', monospace; color: var(--text-value); opacity: 0.8; }
 
-/* Layout Helpers */
 .span-1 { grid-column: span 1; }
 .span-2 { grid-column: span 2; }
 .span-4 { grid-column: span 4; }
 
-/* --- Footer --- */
-.footer {
-  margin-top: 24px;
-  padding: 20px 0 10px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
+/* Footer */
+.footer { margin-top: 24px; padding: 20px 0 10px 0; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .footer-link-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: var(--bg-card);
-    border-radius: 99px;
-    box-shadow: var(--shadow-card);
-    color: var(--text-main);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    border: 1px solid rgba(0,0,0,0.01);
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--bg-card); border-radius: 99px; box-shadow: var(--shadow-card); color: var(--text-main); text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); border: 1px solid rgba(0,0,0,0.01);
 }
-.footer-link-pill:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-hover);
-}
+.footer-link-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .footer-link-pill svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; }
+.copyright { font-size: 0.75rem; color: var(--text-dim); font-weight: 500; letter-spacing: 0.02em; }
 
-.copyright {
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    font-weight: 500;
-    letter-spacing: 0.02em;
+/* 3. Toast */
+.toast-container {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card); color: var(--text-main); padding: 12px 24px;
+    border-radius: 99px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    font-weight: 600; font-size: 0.9rem; pointer-events: none; opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000;
+    display: flex; align-items: center; gap: 8px; border: 1px solid rgba(0,0,0,0.05);
 }
+.toast-container.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-icon { color: var(--status-green); }
 
-/* Skeleton */
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(150,150,150,0.1) 50%, var(--bg-inner) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  color: transparent !important;
-  border-radius: 8px;
-  min-height: 1.2em;
+  background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(150,150,150,0.1) 50%, var(--bg-inner) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; color: transparent !important; border-radius: 8px; min-height: 1.2em;
 }
 html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a3c 50%, #2c2c2e 75%); }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
 .fade-in { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@media (max-width: 768px) {
-  .bento-grid { grid-template-columns: repeat(2, 1fr); }
-  .span-1, .span-2, .col-full { grid-column: span 1; } 
-  .span-4 { grid-column: span 2; }
-}
+@media (max-width: 768px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } .span-1, .span-2, .col-full { grid-column: span 1; } .span-4 { grid-column: span 2; } }
 @media (max-width: 480px) {
-  body { padding: 20px 16px; }
-  .container { gap: 16px; }
-  .hero-card { min-height: 280px; }
-  .hero-content { padding: 40px 20px; }
-  .hero-map-bg { 
-      transform: scale(1.15) translateY(30px); 
-      -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 100%);
-  }
-  .bento-grid { grid-template-columns: 1fr; }
-  .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
+  body { padding: 20px 16px; } .container { gap: 16px; } .hero-card { min-height: 280px; } .hero-content { padding: 40px 20px; }
+  .hero-map-bg { transform: scale(1.15) translateY(30px); -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 100%); }
+  .bento-grid { grid-template-columns: 1fr; } .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
   .brand-logo { font-size: 1.2rem; }
 }
 </style>
@@ -409,12 +278,12 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 
 <div class="container">
   <header class="header-bar">
-    <div class="brand-logo" onclick="location.reload()" title="Reload">
+    <div class="brand-logo" onclick="location.reload()" title="Reload (Press R)">
         IP<span>.</span>WWZ<span>.</span>iM
     </div>
     <div class="controls-group">
         <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
-        <button id="themeToggle" class="btn-circle" title="Toggle Theme">
+        <button id="themeToggle" class="btn-circle" title="Toggle Theme (Press D)">
             <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
         </button>
         <button id="refreshBtn" class="btn-circle" title="Refresh Data">
@@ -560,19 +429,25 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
           <span>Visit WWZ.iM</span>
           <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <div class="copyright">&copy; 2025 WWZ.iM. All Rights Reserved.</div>
+      <div class="copyright">© 2025 WWZ.iM. All Rights Reserved.</div>
   </footer>
+
+  <div id="toast" class="toast-container">
+      <svg class="toast-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <span id="toastMsg">Copied to clipboard</span>
+  </div>
 
 </div>
 
 <script>
 const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
-heroCard: document.getElementById('heroCard'),
-heroMapFrame: document.getElementById('heroMapFrame')
+heroCard: document.getElementById('heroCard'), heroMapFrame: document.getElementById('heroMapFrame'),
+toast: document.getElementById('toast'), toastMsg: document.getElementById('toastMsg')
 };
 let lastIpv6='';
 let currentLang = 'en';
 let mapUrl = ''; 
+let toastTimeout;
 
 const langToggleBtn = document.getElementById('langToggle');
 const themeToggleBtn = document.getElementById('themeToggle');
@@ -583,6 +458,13 @@ const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 // Icons paths
 const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
 const sunPath = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key.toLowerCase() === 'r') { location.reload(); }
+    if (e.key.toLowerCase() === 'd') { themeToggleBtn.click(); }
+});
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
     localStorage.removeItem('ip_geo_cache');
@@ -596,28 +478,19 @@ function switchLang(lang){
     el.textContent = el.getAttribute(`data-${lang}`);
   });
   localStorage.setItem('lang', lang);
-  
   updateCardVisibility('card_ipv6', els.ipv6.textContent);
   updateCardVisibility('card_country', els.country.textContent);
   updateCardVisibility('card_asn', els.asn.textContent);
   updateCardVisibility('card_continent', els.continent.textContent);
   updateCardVisibility('card_postal', els.postal.textContent);
-  
   els.secLabel.textContent = lang === 'zh' ? '局域网 IP' : 'LAN IP';
 }
 
-langToggleBtn.addEventListener('click', () => {
-    switchLang(currentLang === 'en' ? 'zh' : 'en');
-});
+langToggleBtn.addEventListener('click', () => { switchLang(currentLang === 'en' ? 'zh' : 'en'); });
 
 function applyThemeUI(isDark) {
-    if (isDark) {
-        htmlEl.classList.add('dark-mode');
-        themeIcon.innerHTML = sunPath;
-    } else {
-        htmlEl.classList.remove('dark-mode');
-        themeIcon.innerHTML = moonPath;
-    }
+    if (isDark) { htmlEl.classList.add('dark-mode'); themeIcon.innerHTML = sunPath; } 
+    else { htmlEl.classList.remove('dark-mode'); themeIcon.innerHTML = moonPath; }
 }
 
 function initTheme() {
@@ -625,11 +498,8 @@ function initTheme() {
     systemDarkQuery.addEventListener('change', (e) => applyThemeUI(e.matches));
 }
 
-themeToggleBtn.addEventListener('click', () => {
-    applyThemeUI(!htmlEl.classList.contains('dark-mode'));
-});
+themeToggleBtn.addEventListener('click', () => { applyThemeUI(!htmlEl.classList.contains('dark-mode')); });
 
-// --- Connectivity ---
 const sites = [{ id: 'google', url: 'https://www.google.com/favicon.ico' }, { id: 'github', url: 'https://github.com/favicon.ico' }, { id: 'cf', url: 'https://www.cloudflare.com/favicon.ico' }];
 let latencyInterval;
 async function checkLatency() {
@@ -655,34 +525,21 @@ async function checkLatency() {
 }
 function refreshLatency() {
     clearInterval(latencyInterval);
-    sites.forEach(site => {
-        document.getElementById(`lat-${site.id}`).textContent = '...';
-        document.getElementById(`dot-${site.id}`).style.background = 'var(--status-gray)';
-    });
+    sites.forEach(site => { document.getElementById(`lat-${site.id}`).textContent = '...'; document.getElementById(`dot-${site.id}`).style.background = 'var(--status-gray)'; });
     checkLatency();
     latencyInterval = setInterval(checkLatency, 3000);
 }
 
-// --- Browser Info ---
 function getBrowserInfo() {
     const ua = navigator.userAgent;
     let browser = "Unknown";
-    if(ua.includes("Edg")) browser = "Edge";
-    else if(ua.includes("Chrome")) browser = "Chrome";
-    else if(ua.includes("Firefox")) browser = "Firefox";
-    else if(ua.includes("Safari")) browser = "Safari";
+    if(ua.includes("Edg")) browser = "Edge"; else if(ua.includes("Chrome")) browser = "Chrome"; else if(ua.includes("Firefox")) browser = "Firefox"; else if(ua.includes("Safari")) browser = "Safari";
     let os = "Unknown OS";
-    if (ua.indexOf("Win")!=-1) os="Windows";
-    else if (ua.indexOf("Mac")!=-1) os="MacOS";
-    else if (ua.indexOf("X11")!=-1) os="UNIX";
-    else if (ua.indexOf("Linux")!=-1) os="Linux";
-    else if (ua.indexOf("Android")!=-1) os="Android";
-    else if (ua.indexOf("iPhone")!=-1) os="iOS";
+    if (ua.indexOf("Win")!=-1) os="Windows"; else if (ua.indexOf("Mac")!=-1) os="MacOS"; else if (ua.indexOf("X11")!=-1) os="UNIX"; else if (ua.indexOf("Linux")!=-1) os="Linux"; else if (ua.indexOf("Android")!=-1) os="Android"; else if (ua.indexOf("iPhone")!=-1) os="iOS";
     const screenRes = `${window.screen.width} x ${window.screen.height}`;
     els.uaInfo.innerHTML = `${browser} on ${os}<br><span style="color:var(--text-label);font-size:0.8em">Screen: ${screenRes}</span>`;
 }
 
-// --- Local IP (WebRTC) ---
 async function getLocalIP() {
   return new Promise((resolve) => {
     try {
@@ -707,9 +564,7 @@ async function initNetworkCard() {
         els.secVal.textContent = localIP;
         els.secRow.style.display = 'flex'; 
         els.secRow.onclick = () => copyText(els.secVal);
-    } else {
-        els.secRow.style.display = 'none'; 
-    }
+    } else { els.secRow.style.display = 'none'; }
 }
 
 async function copyText(el){
@@ -717,17 +572,50 @@ async function copyText(el){
   if(text && text!=='Unknown'&&text!=='Not Detected'&&text!=='N/A'&&text!=='...'){
     try{ 
         await navigator.clipboard.writeText(text); 
-        const originalColor = el.style.color;
-        el.classList.add('copied');
-        setTimeout(() => el.classList.remove('copied'), 600);
+        showToast(currentLang === 'zh' ? '已复制' : 'Copied to clipboard');
     } catch{}
   }
 }
-function rmSk(el){
-    el.classList.remove('skeleton');
-    el.classList.add('fade-in');
+
+// 2. Round Favicon Generator
+function updateFavicon() {
+    if (!els.flag.src) return;
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.src = els.flag.src;
+    img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.arc(32, 32, 32, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.clip();
+        
+        // Draw image covering the circle
+        const aspect = img.width / img.height;
+        let drawW = 64 * aspect;
+        let drawH = 64;
+        let offsetX = (64 - drawW) / 2;
+        ctx.drawImage(img, offsetX, 0, drawW, drawH);
+        
+        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/png';
+        link.rel = 'icon';
+        link.href = canvas.toDataURL();
+        document.getElementsByTagName('head')[0].appendChild(link);
+    };
 }
-function showFlag(){els.flagSk.style.display='none';els.flag.classList.add('loaded')}
+
+function showToast(msg) {
+    els.toastMsg.textContent = msg;
+    els.toast.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => { els.toast.classList.remove('show'); }, 2000);
+}
+
+function rmSk(el){ el.classList.remove('skeleton'); el.classList.add('fade-in'); }
+function showFlag(){ els.flagSk.style.display='none'; els.flag.classList.add('loaded'); updateFavicon(); }
 
 const CACHE_KEY = 'ip_geo_cache';
 const CACHE_TTL = 10 * 60 * 1000;
@@ -735,20 +623,11 @@ const CACHE_TTL = 10 * 60 * 1000;
 async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
 
 async function getIPs() {
-  const [v4, v6] = await Promise.allSettled([
-    fetchT('https://api.ipify.org?format=json'),
-    fetchT('https://api64.ipify.org?format=json')
-  ]);
-
+  const [v4, v6] = await Promise.allSettled([ fetchT('https://api.ipify.org?format=json'), fetchT('https://api64.ipify.org?format=json') ]);
   const ipv4 = v4.status === 'fulfilled' ? (v4.value.ip || v4.value.text || 'Unknown') : 'Unknown';
   const ipv6 = v6.status === 'fulfilled' ? (v6.value.ip || v6.value.text || '') : 'Not Detected';
-
   if (ipv6 && ipv6 !== ipv4) lastIpv6 = ipv6;
-
-  return {
-    ipv4: ipv4,
-    ipv6: ipv6 || lastIpv6 || 'Not Detected'
-  };
+  return { ipv4: ipv4, ipv6: ipv6 || lastIpv6 || 'Not Detected' };
 }
 
 async function getGeo(ip){
@@ -771,15 +650,9 @@ async function getGeo(ip){
 }
 
 function renderCoords(lat, lon){
-  mapUrl = currentLang === 'zh' 
-    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
-    : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-  
+  mapUrl = currentLang === 'zh' ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   els.heroCard.onclick = () => window.open(mapUrl, '_blank');
-
-  const nLat = parseFloat(lat);
-  const nLon = parseFloat(lon);
-  const delta = 0.05; 
+  const nLat = parseFloat(lat), nLon = parseFloat(lon), delta = 0.05; 
   requestAnimationFrame(() => {
      els.heroMapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${nLon-delta},${nLat-delta},${nLon+delta},${nLat+delta}&layer=mapnik&marker=${nLat},${nLon}`;
      els.heroMapFrame.onload = () => { els.heroMapFrame.classList.add('loaded'); };
@@ -804,25 +677,25 @@ function render(ip,geo){
   const v6 = geo.ipv6||lastIpv6;
   if(v6 && v6!=='Not Detected') { els.ipv6.textContent=v6; } else { els.ipv6.textContent=currentLang==='zh'?'未检测到':'Not Detected'; }
   updateCardVisibility('card_ipv6', els.ipv6.textContent);
-
+  
   els.country.textContent=geo.country_name||geo.country|| (currentLang==='zh'?'未知':'Unknown');
   updateCardVisibility('card_country', els.country.textContent);
-
+  
   const asnNum=geo.connection?.asn||geo.asn||'';
   els.asn.textContent=asnNum?(currentLang==='zh'?`AS${asnNum}`:`AS${asnNum}`): (currentLang==='zh'?'未知':'Unknown');
   updateCardVisibility('card_asn', els.asn.textContent);
-
+  
   els.continent.textContent=geo.continent_name||geo.continent|| (currentLang==='zh'?'未知':'Unknown');
   updateCardVisibility('card_continent', els.continent.textContent);
-
+  
   els.postal.textContent=geo.postal||geo.postal_code|| (currentLang==='zh'?'未知':'Unknown');
   updateCardVisibility('card_postal', els.postal.textContent);
-
+  
   els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
-
+  
   const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
   if(lat && lon && !isNaN(lat) && !isNaN(lon)){ renderCoords(lat, lon); }
-
+  
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
 
