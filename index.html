@@ -27,7 +27,6 @@
   --radius: 20px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
   
-  /* 状态颜色 */
   --status-green: #10b981;
   --status-yellow: #f59e0b;
   --status-red: #ef4444;
@@ -107,15 +106,16 @@ body {
   position: relative;
   overflow: hidden; 
   transition: box-shadow 0.3s, background 0.3s, transform 0.2s;
-  min-height: 320px; 
+  min-height: 360px; /* 稍微增加高度，给地图更多展示空间 */
   justify-content: center;
-  /* 关键：让整个卡片可点击 */
-  cursor: pointer; 
+  cursor: pointer; /* 整个卡片可点击 */
 }
 
-/* 鼠标悬停时，地图稍微清晰一点，提示可点击 */
-.hero-card:hover .hero-map-bg { opacity: 0.25; }
-html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.4; }
+.hero-card:hover .hero-map-bg { 
+    opacity: 0.3; /* 悬停时稍微加深，暗示交互 */
+    transform: scale(1.02); /* 微微放大 */
+}
+html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.5; }
 
 /* 背景地图层 */
 .hero-map-bg {
@@ -124,27 +124,22 @@ html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.4; }
     z-index: 0;
     pointer-events: none; 
     opacity: 0; 
-    transition: opacity 0.5s ease;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    
+    /* 核心修改：使用 Mask 实现“上半部分不显示，下半部分渐变显示” */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
+    
+    /* 浅色模式地图滤镜：素描感 */
     filter: grayscale(100%) contrast(1.1) brightness(1.1);
 }
-.hero-map-bg.loaded { opacity: 0.15; }
+.hero-map-bg.loaded { opacity: 0.2; } /* 默认淡一点，不抢视觉 */
 
 html.dark-mode .hero-map-bg {
+    /* 暗黑模式：反色 + 深蓝冷色调 */
     filter: invert(90%) hue-rotate(180deg) grayscale(20%) contrast(1.2) brightness(0.8);
 }
-html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
-
-/* 渐变遮罩层 */
-.hero-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 1;
-    pointer-events: none;
-    background: radial-gradient(circle at center, var(--bg-card) 30%, rgba(255,255,255,0) 100%);
-}
-html.dark-mode .hero-overlay {
-    background: radial-gradient(circle at center, var(--bg-card) 30%, rgba(0,0,0,0) 100%);
-}
+html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
 
 /* 内容层 */
 .hero-content {
@@ -155,13 +150,11 @@ html.dark-mode .hero-overlay {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    /* 关键：让内容层本身不阻挡点击，但子元素（如文字）可以交互 */
-    pointer-events: none; 
+    pointer-events: none; /* 让点击穿透到卡片背景 */
 }
 
-/* 让特定的子元素恢复交互 */
+/* 恢复内部交互元素的点击 */
 .hero-content > * { pointer-events: auto; }
-/* 但像 label 这种纯展示的其实不需要交互，为了防止误触复制，可以保持 auto 或者 none */
 
 .flag-container {
   width: 88px; height: 66px;
@@ -170,9 +163,12 @@ html.dark-mode .hero-overlay {
   margin-bottom: 20px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08); 
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06); 
   z-index: 2;
+  transition: transform 0.3s;
 }
+.hero-card:hover .flag-container { transform: translateY(-2px); }
+
 .flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
 .flag-img.loaded { opacity: 1; }
 
@@ -183,7 +179,9 @@ html.dark-mode .hero-overlay {
   color: var(--text-label);
   text-transform: uppercase;
   margin-bottom: 12px;
-  text-shadow: 0 2px 4px var(--bg-card); 
+  background: var(--bg-card); /* 确保文字背景干净 */
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 #ipAddr {
@@ -193,9 +191,10 @@ html.dark-mode .hero-overlay {
   line-height: 1;
   margin-bottom: 20px;
   letter-spacing: -0.04em;
-  cursor: pointer; /* 保持点击复制 */
+  cursor: pointer; 
   transition: opacity 0.2s, color 0.3s;
-  text-shadow: 0 2px 0 var(--bg-card), 0 0 20px var(--bg-card); 
+  /* 移除阴影，因为背景现在是纯净的 */
+  text-shadow: none;
 }
 #ipAddr:active { opacity: 0.6; }
 
@@ -348,8 +347,6 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 
   <div class="hero-card" id="heroCard">
     <iframe id="heroMapFrame" class="hero-map-bg" src="about:blank" loading="lazy"></iframe>
-    <div class="hero-overlay"></div>
-    
     <div class="hero-content">
         <div class="flag-container">
           <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
@@ -362,7 +359,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
           <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
         </div>
     </div>
-    </div>
+  </div>
 
   <div class="bento-grid">
 
@@ -485,13 +482,12 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 
 <script>
 const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
-// New Map Elements
 heroCard: document.getElementById('heroCard'),
 heroMapFrame: document.getElementById('heroMapFrame')
 };
 let lastIpv6='';
 let currentLang = 'en';
-let mapUrl = ''; // Store the map URL
+let mapUrl = ''; 
 
 const langToggleBtn = document.getElementById('langToggle');
 const themeToggleBtn = document.getElementById('themeToggle');
@@ -687,15 +683,12 @@ async function getGeo(ip){
 }
 
 function renderCoords(lat, lon){
-  // Update Global mapUrl
   mapUrl = currentLang === 'zh' 
     ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
     : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   
-  // 绑定整个卡片的点击事件
   els.heroCard.onclick = () => window.open(mapUrl, '_blank');
 
-  // Set Iframe Src
   const nLat = parseFloat(lat);
   const nLon = parseFloat(lon);
   const delta = 0.05; 
