@@ -5,12 +5,49 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121212" media="(prefers-color-scheme: dark)">
+
+<title>本机 IP 查询 | My IP Address & Geo Location - IP.WWZ.iM</title>
+<meta name="description" content="极简风格 IP 地址查询工具。快速查看您的公网 IPv4/IPv6 地址、地理位置、ISP 运营商、ASN 信息、经纬度及网络连通性测试。无广告，纯净体验。">
+<meta name="keywords" content="IP查询, 本机IP, 公网IP, IPv6测试, 地理位置查询, IP Geo, IP Location, Check IP, My IP Address, Network Test, IP.WWZ.iM">
+<meta name="author" content="WangWenzhi">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://ip.wwz.im/">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ip.wwz.im/">
+<meta property="og:title" content="IP Insight | 极简 IP 查询工具">
+<meta property="og:description" content="一键查询本机 IPv4/IPv6、地理位置、ISP 及网络连通性。极致黑白设计，极客必备。">
+<meta property="og:image" content="https://ip.wwz.im/preview.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://ip.wwz.im/">
+<meta name="twitter:title" content="IP Insight | 极简 IP 查询工具">
+<meta name="twitter:description" content="一键查询本机 IPv4/IPv6、地理位置、ISP 及网络连通性。">
+<meta name="twitter:image" content="https://ip.wwz.im/preview.png">
+
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
-<title>IP.WWZ.iM | Insight</title>
+
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
 <link rel="preconnect" href="https://dns.google">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "IP Insight",
+  "url": "https://ip.wwz.im",
+  "description": "A minimalist tool to check your public IP address, geolocation, ISP, and network connectivity.",
+  "applicationCategory": "Utility",
+  "operatingSystem": "Any",
+  "author": {
+    "@type": "Person",
+    "name": "WangWenzhi",
+    "url": "https://wwz.im"
+  }
+}
+</script>
 
 <style>
 /* --- 极致黑白视觉系统 (Soft & Airy) --- */
@@ -24,6 +61,7 @@
   --text-value: #1f1f1f;
   --text-dim: #a3a3a3;
   
+  /* 阴影：极柔和、空气感 */
   --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.02), 0 4px 16px -4px rgba(0, 0, 0, 0.02);
   --shadow-hover: 0 8px 24px -6px rgba(0, 0, 0, 0.04), 0 4px 8px -2px rgba(0, 0, 0, 0.01);
   
@@ -52,7 +90,7 @@ html.dark-mode {
     --status-gray: #3a3a3c;
 }
 
-/* 2. Custom Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 99px; }
@@ -90,6 +128,7 @@ body {
   margin-bottom: 4px;
 }
 
+/* 使用 H1 但保持 Logo 样式，为了 SEO */
 .brand-logo {
   font-family: var(--font-family);
   font-weight: 800;
@@ -102,6 +141,7 @@ body {
   gap: 2px;
   transition: opacity 0.2s;
   user-select: none;
+  margin: 0;
 }
 .brand-logo:hover { opacity: 0.7; }
 .brand-logo span { opacity: 0.4; font-weight: 400; font-size: 0.9em; margin: 0 1px; }
@@ -244,8 +284,9 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
 .footer-link-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .footer-link-pill svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; }
 .copyright { font-size: 0.75rem; color: var(--text-dim); font-weight: 500; letter-spacing: 0.02em; }
+.seo-text { max-width: 600px; text-align: center; color: var(--text-dim); font-size: 0.7rem; line-height: 1.6; opacity: 0.5; margin-top: 8px; }
 
-/* 3. Toast */
+/* Toast */
 .toast-container {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
     background: var(--bg-card); color: var(--text-main); padding: 12px 24px;
@@ -278,9 +319,9 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 
 <div class="container">
   <header class="header-bar">
-    <div class="brand-logo" onclick="location.reload()" title="Reload (Press R)">
+    <h1 class="brand-logo" onclick="location.reload()" title="Reload (Press R)">
         IP<span>.</span>WWZ<span>.</span>iM
-    </div>
+    </h1>
     <div class="controls-group">
         <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
         <button id="themeToggle" class="btn-circle" title="Toggle Theme (Press D)">
@@ -300,7 +341,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
           <img id="ip-flag" class="flag-img" alt="Flag">
         </div>
         <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
-        <div id="ipAddr" class="skeleton" onclick="copyText(this); event.stopPropagation();" style="min-width: 200px; height: 3.5rem;"></div>
+        <div id="ipAddr" class="skeleton" onclick="copyText(this); event.stopPropagation();" style="min-width: 200px; height: 3.5rem;">Checking...</div>
         <div class="location-pill">
           <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
           <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
@@ -430,6 +471,10 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
           <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       <div class="copyright">© 2025 WWZ.iM. All Rights Reserved.</div>
+      <div class="seo-text">
+          Free tool to check your <strong>Public IP Address</strong>, <strong>IPv6</strong>, <strong>ISP</strong>, and <strong>Geolocation</strong>. 
+          Test network latency and WebRTC leakage.
+      </div>
   </footer>
 
   <div id="toast" class="toast-container">
