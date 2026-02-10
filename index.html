@@ -339,10 +339,6 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
                 <div class="network-label" data-zh="主机名" data-en="Hostname">Hostname</div>
                 <div id="hostname" class="network-val skeleton"></div>
             </div>
-            <div class="network-item" id="secondary-row" style="cursor:pointer; display:none;">
-                <div class="network-label" id="sec-label">LAN IP</div>
-                <div id="sec-val" class="network-val">...</div>
-            </div>
         </div>
       </div>
     </div>
@@ -431,7 +427,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 </div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),
 heroCard: document.getElementById('heroCard'), heroMapFrame: document.getElementById('heroMapFrame'),
 toast: document.getElementById('toast'), toastMsg: document.getElementById('toastMsg'),
 shareBtn: document.getElementById('shareBtn'), offlineAlert: document.getElementById('offlineAlert'),
@@ -493,7 +489,6 @@ function switchLang(lang){
   updateCardVisibility('card_asn', els.asn.textContent);
   updateCardVisibility('card_continent', els.continent.textContent);
   updateCardVisibility('card_postal', els.postal.textContent);
-  els.secLabel.textContent = lang === 'zh' ? '局域网 IP' : 'LAN IP';
   els.offlineAlert.textContent = lang === 'zh' ? '网络连接已断开' : 'No Internet Connection';
 }
 
@@ -559,33 +554,6 @@ function getBrowserInfo() {
     if (ua.indexOf("Win")!=-1) os="Windows"; else if (ua.indexOf("Mac")!=-1) os="MacOS"; else if (ua.indexOf("X11")!=-1) os="UNIX"; else if (ua.indexOf("Linux")!=-1) os="Linux"; else if (ua.indexOf("Android")!=-1) os="Android"; else if (ua.indexOf("iPhone")!=-1) os="iOS";
     const screenRes = `${window.screen.width} x ${window.screen.height}`;
     els.uaInfo.innerHTML = `${browser} on ${os}<br><span style="color:var(--text-label);font-size:0.8em">Screen: ${screenRes}</span>`;
-}
-
-async function getLocalIP() {
-  return new Promise((resolve) => {
-    try {
-      const pc = new RTCPeerConnection({iceServers: []});
-      pc.createDataChannel('');
-      pc.createOffer().then(o => pc.setLocalDescription(o));
-      pc.onicecandidate = (ice) => {
-        if (ice && ice.candidate && ice.candidate.candidate) {
-           const result = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(ice.candidate.candidate);
-           if(result) { resolve(result[1]); pc.close(); }
-        }
-      };
-      setTimeout(() => { resolve(null); if(pc) pc.close(); }, 1000);
-    } catch(e) { resolve(null); }
-  });
-}
-
-async function initNetworkCard() {
-    const localIP = await getLocalIP();
-    if(localIP) {
-        els.secLabel.textContent = currentLang === 'zh' ? '局域网 IP' : 'LAN IP';
-        els.secVal.textContent = localIP;
-        els.secRow.style.display = 'flex'; 
-        els.secRow.onclick = () => copyText(els.secVal);
-    } else { els.secRow.style.display = 'none'; }
 }
 
 async function copyText(el){
@@ -717,7 +685,7 @@ async function start(){
   getBrowserInfo();
   checkLatency(); 
   latencyInterval = setInterval(checkLatency, 3000);
-  initNetworkCard();
+  // Removed initNetworkCard() call here
 
   const savedLang = localStorage.getItem('lang');
   if (savedLang) { switchLang(savedLang); } else { switchLang('en'); }
