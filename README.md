@@ -44,30 +44,3 @@
 ### 方法 2: 部署到静态托管
 你可以直接将其部署到 GitHub Pages, Vercel, Netlify 或 Cloudflare Pages。
 
-## 🧩 项目结构
-
-```text
-/
-└── index.html  # 包含所有 HTML 结构、CSS 样式和 JS 逻辑
-🔒 隐私说明
-无后端：所有数据请求均由浏览器直接向第三方公共 API 发起。
-
-无追踪：本项目不包含任何统计代码（如 Google Analytics），不收集用户数据。
-
-WebRTC：LAN IP 检测功能仅在本地运行，不会将你的内网 IP 发送给任何服务器。
-
-🤝 贡献
-欢迎提交 Issue 或 Pull Request 来改进代码。
-
-📄 许可证
-本项目基于 MIT License 开源。
-
-
-### 建议添加的内容
-如果你有项目的截图（就是你刚才发给我的那些），建议将它们放在项目文件夹里（例如命名为 `screenshot-light.png` 和 `screenshot-dark.png`），然后在 README 的“主要特性”部分之前加上图片展示，效果会更好：
-
-```markdown
-<div align="center">
-  <img src="screenshot-light.png" width="45%" alt="Light Mode">
-  <img src="screenshot-dark.png" width="45%" alt="Dark Mode">
-</div>
