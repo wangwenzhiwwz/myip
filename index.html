@@ -702,60 +702,23 @@ function showFlag(){els.flagSk.style.display='none';els.flag.classList.add('load
 const CACHE_KEY = 'ip_geo_cache';
 const CACHE_TTL = 10 * 60 * 1000;
 
-/* [优化] 多源并发检测 IP，提高 IPv6 识别率 */
+async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
+
+/* [回滚] 使用最原始的 IP 检测源，保证 Geo 数据兼容性 */
 async function getIPs() {
-  const v4Sources = [
-    'https://4.myip.is/',
-    'https://api.ipify.org?format=json',
-    'https://api4.my-ip.io/ip.json',
-    'https://ipv4.icanhazip.com' 
-  ];
-  const v6Sources = [
-    'https://6.myip.is/',
-    'https://api6.ipify.org?format=json',      
-    'https://ipv6.seeip.org/jsonip',           
-    'https://api6.my-ip.io/ip.json',           
-    'https://ipv6.icanhazip.com'               
-  ];
-
-  const fetchWithTimeout = async (url, timeout = 3000) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(id);
-      if (!response.ok) throw new Error('Network response was not ok');
-      const text = await response.text();
-      try {
-        const data = JSON.parse(text);
-        return data.ip || data.query || text; 
-      } catch {
-        return text.trim(); 
-      }
-    } catch (error) {
-      clearTimeout(id);
-      throw error;
-    }
-  };
-
-  const raceSources = async (sources) => {
-    try {
-      return await Promise.any(sources.map(src => fetchWithTimeout(src)));
-    } catch (error) {
-      return null;
-    }
-  };
-
-  const [ipv4, ipv6] = await Promise.all([
-    raceSources(v4Sources),
-    raceSources(v6Sources)
+  const [v4, v6] = await Promise.allSettled([
+    fetchT('https://api.ipify.org?format=json'),
+    fetchT('https://api64.ipify.org?format=json')
   ]);
 
-  if (ipv6) lastIpv6 = ipv6;
+  const ipv4 = v4.status === 'fulfilled' ? (v4.value.ip || v4.value.text || 'Unknown') : 'Unknown';
+  const ipv6 = v6.status === 'fulfilled' ? (v6.value.ip || v6.value.text || '') : 'Not Detected';
+
+  if (ipv6 && ipv6 !== ipv4) lastIpv6 = ipv6;
 
   return {
-    ipv4: ipv4 || 'Unknown',
-    ipv6: ipv6 || 'Not Detected'
+    ipv4: ipv4,
+    ipv6: ipv6 || lastIpv6 || 'Not Detected'
   };
 }
 
@@ -835,7 +798,6 @@ async function start(){
   localStorage.removeItem('theme');
   initTheme();
   getBrowserInfo();
-  
   checkLatency(); 
   latencyInterval = setInterval(checkLatency, 3000);
   initNetworkCard();
