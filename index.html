@@ -27,20 +27,11 @@
   --radius: 20px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
   
-  --map-filter: grayscale(100%) contrast(1.2);
-  --map-opacity: 0.6;
-  
   /* 状态颜色 */
   --status-green: #10b981;
   --status-yellow: #f59e0b;
   --status-red: #ef4444;
   --status-gray: #e5e7eb;
-
-  /* 磨砂玻璃按钮变量 */
-  --btn-glass-bg: rgba(255, 255, 255, 0.6);
-  --btn-glass-border: rgba(0, 0, 0, 0.08);
-  --btn-glass-hover: rgba(255, 255, 255, 0.85);
-  --glass-blur: 16px;
 }
 
 html.dark-mode {
@@ -55,14 +46,7 @@ html.dark-mode {
     --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.1);
     --shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.3);
     
-    --map-filter: grayscale(100%) invert(100%) contrast(1.1) brightness(0.8);
-    --map-opacity: 0.5;
-    
     --status-gray: #333333;
-
-    --btn-glass-bg: rgba(40, 40, 40, 0.6);
-    --btn-glass-border: rgba(255, 255, 255, 0.1);
-    --btn-glass-hover: rgba(60, 60, 60, 0.85);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -110,30 +94,96 @@ body {
 .btn-circle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .btn-circle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* --- Hero Card --- */
+/* --- Hero Card Fusion --- */
 .hero-card {
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
-  padding: 48px 30px; 
+  /* 移除内边距，交给内部 content */
+  padding: 0; 
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* 裁剪地图 */
   transition: box-shadow 0.3s, background 0.3s;
+  min-height: 320px; /* 保证有足够的高度展示地图背景 */
+  justify-content: center;
 }
+
+/* 背景地图层 */
+.hero-map-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none; /* 让鼠标穿透地图，可以选中文本 */
+    opacity: 0; /* 加载前隐藏 */
+    transition: opacity 1s ease;
+    /* 浅色模式地图滤镜：黑白灰素描感 */
+    filter: grayscale(100%) contrast(1.1) brightness(1.1);
+}
+.hero-map-bg.loaded { opacity: 0.15; } /* 浅色模式下透明度低一点，不干扰文字 */
+
+/* 暗黑模式地图滤镜 */
+html.dark-mode .hero-map-bg {
+    /* 反色+深色化 */
+    filter: invert(90%) hue-rotate(180deg) grayscale(20%) contrast(1.2) brightness(0.8);
+}
+html.dark-mode .hero-map-bg.loaded { opacity: 0.3; } /* 暗黑模式可以稍微不透明一点 */
+
+/* 渐变遮罩层：让文字区域背景更实，边缘透出地图 */
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    /* 径向渐变：中心接近不透明，四周透明 */
+    background: radial-gradient(circle at center, var(--bg-card) 30%, rgba(255,255,255,0) 100%);
+}
+html.dark-mode .hero-overlay {
+    background: radial-gradient(circle at center, var(--bg-card) 30%, rgba(0,0,0,0) 100%);
+}
+
+/* 内容层：层级最高 */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 48px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* 跳转地图小按钮 */
+.map-link-btn {
+    position: absolute;
+    bottom: 16px; right: 16px;
+    z-index: 3;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-label);
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+.hero-card:hover .map-link-btn { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.map-link-btn:hover { color: var(--text-main); transform: scale(1.1); }
+
 
 .flag-container {
   width: 88px; height: 66px;
   border-radius: 12px;
-  background: var(--bg-inner);
+  background: var(--bg-inner); /* 稍微保留背景，防止旗帜融入地图太深 */
   margin-bottom: 20px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
-  transition: background 0.3s;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08); /* 加深阴影，增加层次感 */
+  z-index: 2;
 }
 .flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
 .flag-img.loaded { opacity: 1; }
@@ -145,6 +195,7 @@ body {
   color: var(--text-label);
   text-transform: uppercase;
   margin-bottom: 12px;
+  text-shadow: 0 2px 4px var(--bg-card); /* 增加文字描边/阴影，防止背景干扰 */
 }
 
 #ipAddr {
@@ -156,6 +207,8 @@ body {
   letter-spacing: -0.04em;
   cursor: pointer;
   transition: opacity 0.2s, color 0.3s;
+  /* 文字阴影，增强对比度 */
+  text-shadow: 0 2px 0 var(--bg-card), 0 0 20px var(--bg-card); 
 }
 #ipAddr:active { opacity: 0.6; }
 
@@ -170,6 +223,7 @@ body {
   font-size: 1rem;
   color: var(--text-value);
   transition: background 0.3s, color 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 增加浮起感 */
 }
 .location-pill svg { width: 16px; height: 16px; fill: currentColor; }
 
@@ -267,67 +321,6 @@ body {
 }
 .latency-ms { font-family: 'Inter', monospace; color: var(--text-value); opacity: 0.9; }
 
-/* Map Card Logic */
-#mapCard { 
-    border: 0; padding: 0 !important; 
-    transition: all 0.3s ease;
-    display: none; 
-    overflow: hidden;
-}
-#mapCard.visible { 
-    display: block; 
-    min-height: 280px; 
-    position: relative;
-}
-#mapFrame {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
-    filter: var(--map-filter); opacity: var(--map-opacity);
-    transition: filter 0.5s, opacity 0.5s; pointer-events: none; z-index: 0;
-}
-#mapCard:hover #mapFrame { pointer-events: auto; filter: grayscale(0%); opacity: 1; }
-
-.map-overlay-content { 
-    position: relative; z-index: 2; width: 100%; height: 100%; 
-    padding: 24px; 
-    background: linear-gradient(180deg, var(--bg-card) 30%, rgba(255,255,255,0) 100%); 
-    pointer-events: none; 
-}
-html.dark-mode .map-overlay-content { background: linear-gradient(180deg, var(--bg-card) 30%, rgba(0,0,0,0) 100%); }
-
-.map-info-group {
-    pointer-events: auto;
-    display: inline-flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--bg-card);
-    padding: 12px 16px;
-    border-radius: 16px;
-    box-shadow: var(--shadow-card);
-}
-
-.map-btn-link {
-  position: absolute;
-  top: 24px; right: 24px; z-index: 10;
-  background: var(--btn-glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  border: 1px solid var(--btn-glass-border);
-  color: var(--text-main);
-  text-decoration: none;
-  font-size: 0.85rem; font-weight: 700;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 18px; border-radius: 14px; 
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  pointer-events: auto;
-}
-.map-btn-link:hover { 
-    transform: translateY(-3px); 
-    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    background: var(--btn-glass-hover); 
-}
-.map-btn-link svg { width: 16px; height: 16px; stroke-width: 2.5; }
-
 /* Skeleton */
 .skeleton {
   background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(128,128,128,0.1) 50%, var(--bg-inner) 75%);
@@ -346,11 +339,10 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
   .span-4 { grid-column: span 2; }
 }
 @media (max-width: 480px) {
-  .hero-card { padding: 30px 20px; }
+  .hero-card { padding: 0; min-height: 280px; }
+  .hero-content { padding: 40px 20px; }
   .bento-grid { grid-template-columns: 1fr; }
   .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
-  .map-btn-link { top: 16px; right: 16px; padding: 10px 14px; font-size: 0.8rem; }
-  .map-info-group { padding: 10px 14px; }
 }
 </style>
 </head>
@@ -368,16 +360,25 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
   </div>
 
   <div class="hero-card">
-    <div class="flag-container">
-      <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
-      <img id="ip-flag" class="flag-img" alt="Flag">
+    <iframe id="heroMapFrame" class="hero-map-bg" src="about:blank" loading="lazy"></iframe>
+    <div class="hero-overlay"></div>
+    
+    <div class="hero-content">
+        <div class="flag-container">
+          <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
+          <img id="ip-flag" class="flag-img" alt="Flag">
+        </div>
+        <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
+        <div id="ipAddr" class="skeleton" onclick="copyText(this)" style="min-width: 200px; height: 3.5rem;"></div>
+        <div class="location-pill">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
+        </div>
     </div>
-    <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
-    <div id="ipAddr" class="skeleton" onclick="copyText(this)" style="min-width: 200px; height: 3.5rem;"></div>
-    <div class="location-pill">
-      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-      <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
-    </div>
+    
+    <a id="heroMapLink" href="#" target="_blank" class="map-link-btn" title="Open in Maps">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+    </a>
   </div>
 
   <div class="bento-grid">
@@ -496,28 +497,15 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
       </div>
     </div>
 
-    <div class="card span-4" id="mapCard">
-        <iframe id="mapFrame" src=""></iframe>
-        <a id="mapLink" href="#" target="_blank" class="map-btn-link">
-           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-           <span data-zh="打开地图" data-en="Open Maps">Open Maps</span> 
-        </a>
-        <div class="map-overlay-content">
-             <div class="map-info-group">
-                <div class="card-label">
-                    <div class="card-icon-box"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg></div>
-                    <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span>
-                </div>
-                <div id="coords" class="card-value skeleton"></div>
-            </div>
-        </div>
-    </div>
-
   </div>
 </div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
+// New Map Elements
+heroMapFrame: document.getElementById('heroMapFrame'),
+heroMapLink: document.getElementById('heroMapLink')
+};
 let lastIpv6='';
 let currentLang = 'en';
 
@@ -647,16 +635,15 @@ async function getLocalIP() {
   });
 }
 
-// [优化] 仅尝试获取 LAN IP，失败则隐藏行，不显示替补内容
 async function initNetworkCard() {
     const localIP = await getLocalIP();
     if(localIP) {
         els.secLabel.textContent = currentLang === 'zh' ? '局域网 IP' : 'LAN IP';
         els.secVal.textContent = localIP;
-        els.secRow.style.display = 'flex'; // 显示行
+        els.secRow.style.display = 'flex'; 
         els.secRow.onclick = () => copyText(els.secVal);
     } else {
-        els.secRow.style.display = 'none'; // 隐藏行
+        els.secRow.style.display = 'none'; 
     }
 }
 
@@ -679,7 +666,6 @@ const CACHE_TTL = 10 * 60 * 1000;
 
 async function fetchT(url,t=6000){const c=new AbortController();setTimeout(()=>c.abort(),t);const r=await fetch(url,{signal:c.signal});if(!r.ok)throw'';const ct=r.headers.get('content-type')||'';return ct.includes('json')||ct.includes('text')?r.json():{text:(await r.text()).trim()}}
 
-/* [回滚] 使用最原始的 IP 检测源，保证 Geo 数据兼容性 */
 async function getIPs() {
   const [v4, v6] = await Promise.allSettled([
     fetchT('https://api.ipify.org?format=json'),
@@ -717,14 +703,22 @@ async function getGeo(ip){
 }
 
 function renderCoords(lat, lon){
-  els.coords.textContent = `${lat}, ${lon}`;
+  // Set link
   const mapUrl = currentLang === 'zh' 
     ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
     : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-  els.mapLink.href = mapUrl;
-  els.mapCard.classList.add('visible');
+  els.heroMapLink.href = mapUrl;
+
+  // Set Iframe Src
+  const nLat = parseFloat(lat);
+  const nLon = parseFloat(lon);
   const delta = 0.05; 
-  els.mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-delta},${lat-delta},${parseFloat(lon)+delta},${parseFloat(lat)+delta}&layer=mapnik&marker=${lat},${lon}`;
+  // Wait a bit to ensure UI ready
+  requestAnimationFrame(() => {
+     els.heroMapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${nLon-delta},${nLat-delta},${nLon+delta},${nLat+delta}&layer=mapnik&marker=${nLat},${nLon}`;
+     // Show Map nicely when loaded (simple delay or onload)
+     els.heroMapFrame.onload = () => { els.heroMapFrame.classList.add('loaded'); };
+  });
 }
 
 function updateCardVisibility(id, value) {
@@ -740,7 +734,7 @@ function render(ip,geo){
   els.ipPlace.innerHTML = place || (currentLang==='zh'?'未知地区':'Unknown Location'); rmSk(els.ipPlace);
   let code=(geo.country_code||geo.country||'').toLowerCase();
   if(code.length===2){els.flag.src=`https://flagcdn.com/w160/${code}.png`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
-  [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal,els.ipv6].forEach(rmSk);
+  [els.hostname,els.country,els.asn,els.org,els.continent,els.postal,els.ipv6].forEach(rmSk);
   
   const v6 = geo.ipv6||lastIpv6;
   if(v6 && v6!=='Not Detected') { els.ipv6.textContent=v6; } else { els.ipv6.textContent=currentLang==='zh'?'未检测到':'Not Detected'; }
@@ -762,7 +756,7 @@ function render(ip,geo){
   els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
 
   const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
-  if(lat && lon && !isNaN(lat) && !isNaN(lon)){ renderCoords(lat, lon); } else { els.mapCard.classList.remove('visible'); els.mapFrame.src = ''; }
+  if(lat && lon && !isNaN(lat) && !isNaN(lon)){ renderCoords(lat, lon); }
 
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
