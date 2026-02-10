@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>IP Insight | Monochrome</title>
+<meta name="theme-color" content="#f2f3f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+<title>IP.WWZ.iM | Insight</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
 <link rel="preconnect" href="https://dns.google">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 /* --- 极致黑白视觉系统 (Monochrome) --- */
@@ -57,7 +59,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 40px 16px; 
+  padding: 30px 16px; 
   transition: background 0.3s, color 0.3s;
 }
 
@@ -66,17 +68,39 @@ body {
   max-width: 800px; 
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-/* Controls */
-.controls-header {
+/* --- Header Section (Logo + Controls) --- */
+.header-bar {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-bottom: 4px;
-  z-index: 10;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
 }
+
+.brand-logo {
+  font-family: var(--font-family);
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+.brand-logo:hover { opacity: 0.7; }
+.brand-logo span { opacity: 0.5; font-weight: 400; font-size: 0.9em; margin: 0 1px; }
+
+.controls-group {
+  display: flex;
+  gap: 12px;
+}
+
 .btn-circle {
   width: 40px; height: 40px;
   border-radius: 50%; 
@@ -106,45 +130,40 @@ body {
   position: relative;
   overflow: hidden; 
   transition: box-shadow 0.3s, background 0.3s, transform 0.2s;
-  min-height: 360px;
+  min-height: 340px;
   justify-content: center;
   cursor: pointer;
 }
 
-/* 悬停交互：地图轻微放大并变清晰 */
+/* 交互：悬停放大背景 */
 .hero-card:hover .hero-map-bg { 
-    /* 保持 visible 状态下的 transform，并叠加一点点缩放 */
     opacity: 0.4; 
     transform: scale(1.05) translateY(0); 
 }
 html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.6; }
 
-/* 背景地图层 - 动画核心 */
+/* 背景地图层 */
 .hero-map-bg {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     z-index: 0;
     pointer-events: none; 
-    
-    /* 初始状态：完全透明，放大，且向下偏移（沉在下面） */
+    /* 入场动画状态 */
     opacity: 0; 
-    transform: scale(1.2) translateY(60px); 
+    transform: scale(1.2) translateY(50px); 
     
-    /* 动画定义：使用 cubic-bezier 制造丝滑的“刹车”感 */
     transition: 
         opacity 1.5s ease-out, 
-        transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+        transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
     
-    /* Mask 遮罩：上虚下实 */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
-    mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
+    /* 核心 Mask: 上虚下实 */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 30%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 30%, black 100%);
     
-    /* 浅色模式地图滤镜 */
     filter: grayscale(100%) contrast(1.1) brightness(1.1);
-    will-change: transform, opacity; /* 性能优化 */
+    will-change: transform, opacity; 
 }
 
-/* 加载完成状态：回归正常位置，显示出来 */
 .hero-map-bg.loaded { 
     opacity: 0.2; 
     transform: scale(1) translateY(0); 
@@ -197,14 +216,14 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
 }
 
 #ipAddr {
-  font-size: clamp(2.5rem, 6vw, 4rem); 
+  font-size: clamp(2.5rem, 6vw, 4.2rem); 
   font-weight: 800;
   color: var(--text-main);
   line-height: 1;
   margin-bottom: 20px;
   letter-spacing: -0.04em;
   cursor: pointer; 
-  transition: opacity 0.2s, color 0.3s;
+  transition: color 0.3s;
 }
 #ipAddr:active { opacity: 0.6; }
 
@@ -262,7 +281,6 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
   letter-spacing: 0.05em;
 }
 
-/* Icons */
 .card-icon-box {
   width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
@@ -285,26 +303,13 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
 .card-value.dim { color: var(--text-dim); font-weight: 500; }
 .card-value.copied { color: var(--status-green) !important; }
 
-/* Network Info List */
-.network-list {
-  display: flex; flex-direction: column; gap: 12px; margin-top: 6px;
-}
-.network-item {
-  display: flex; flex-direction: column; gap: 2px;
-}
-.network-label {
-  font-size: 0.7rem; font-weight: 700; color: var(--text-label); opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em;
-}
-.network-val {
-  font-size: 0.95rem; font-weight: 600; color: var(--text-value); font-family: 'Inter', monospace;
-}
+/* Network List */
+.network-list { display: flex; flex-direction: column; gap: 12px; margin-top: 6px; }
+.network-item { display: flex; flex-direction: column; gap: 2px; }
+.network-label { font-size: 0.7rem; font-weight: 700; color: var(--text-label); opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; }
+.network-val { font-size: 0.95rem; font-weight: 600; color: var(--text-value); font-family: 'Inter', monospace; }
 
-/* Layout Helpers */
-.span-1 { grid-column: span 1; }
-.span-2 { grid-column: span 2; }
-.span-4 { grid-column: span 4; }
-
-/* Connectivity List */
+/* Connectivity */
 .latency-list { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 5px; }
 .latency-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; }
 .latency-name { display: flex; align-items: center; gap: 8px; color: var(--text-label); }
@@ -317,7 +322,12 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
 }
 .latency-ms { font-family: 'Inter', monospace; color: var(--text-value); opacity: 0.9; }
 
-/* Skeleton */
+/* Layout Helpers */
+.span-1 { grid-column: span 1; }
+.span-2 { grid-column: span 2; }
+.span-4 { grid-column: span 4; }
+
+/* Skeleton & Animation */
 .skeleton {
   background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(128,128,128,0.1) 50%, var(--bg-inner) 75%);
   background-size: 200% 100%;
@@ -329,35 +339,53 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
 html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+/* Fade In Animation for Content */
+.fade-in {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 768px) {
   .bento-grid { grid-template-columns: repeat(2, 1fr); }
   .span-1, .span-2, .col-full { grid-column: span 1; } 
   .span-4 { grid-column: span 2; }
 }
 @media (max-width: 480px) {
-  .hero-card { padding: 0; min-height: 280px; }
-  .hero-content { padding: 40px 20px; }
+  .hero-card { min-height: 260px; }
+  .hero-content { padding: 36px 20px; }
+  .hero-map-bg { 
+      transform: scale(1.2) translateY(30px); /* 移动端减小位移 */
+      -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 100%);
+  }
   .bento-grid { grid-template-columns: 1fr; }
   .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
+  .brand-logo { font-size: 1.2rem; }
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="controls-header">
-    <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
-    <button id="themeToggle" class="btn-circle" title="Toggle Theme">
-        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-    </button>
-    <button id="refreshBtn" class="btn-circle" title="Refresh">
-        <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-    </button>
-  </div>
+  <header class="header-bar">
+    <div class="brand-logo" onclick="location.reload()" title="Reload">
+        IP<span>.</span>WWZ<span>.</span>iM
+    </div>
+    <div class="controls-group">
+        <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
+        <button id="themeToggle" class="btn-circle" title="Toggle Theme">
+            <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+        <button id="refreshBtn" class="btn-circle" title="Refresh Data">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+        </button>
+    </div>
+  </header>
 
   <div class="hero-card" id="heroCard">
     <iframe id="heroMapFrame" class="hero-map-bg" src="about:blank" loading="lazy"></iframe>
-    
     <div class="hero-content">
         <div class="flag-container">
           <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
@@ -402,8 +430,6 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
         </div>
       </div>
     </div>
-
-  
 
     <div class="card span-2" id="card_org" onclick="copyText(document.getElementById('org'))">
       <div class="info-row">
@@ -649,7 +675,11 @@ async function copyText(el){
     } catch{}
   }
 }
-function rmSk(el){el.classList.remove('skeleton')}
+function rmSk(el){
+    el.classList.remove('skeleton');
+    // Add fade-in effect when skeleton is removed
+    el.classList.add('fade-in');
+}
 function showFlag(){els.flagSk.style.display='none';els.flag.classList.add('loaded')}
 
 const CACHE_KEY = 'ip_geo_cache';
