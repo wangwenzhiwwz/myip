@@ -11,7 +11,6 @@
 
 <title>IP.WWZ.iM | Network Insight Tool</title>
 <meta name="description" content="Minimalist tool to check your Public IP, IPv6, Geolocation, and Network Status.">
-<meta name="keywords" content="IP查询, 本机IP, IP Geo, Check IP, Network Test, IP.WWZ.iM">
 <link rel="canonical" href="https://ip.wwz.im/">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
@@ -54,10 +53,6 @@
   --status-yellow: #f59e0b; 
   --status-red: #ef4444; 
   --status-gray: #e5e7eb;
-
-  /* Map Specific */
-  --btn-glass-bg: rgba(255, 255, 255, 0.7);
-  --btn-glass-border: rgba(0, 0, 0, 0.06);
 }
 
 html.dark-mode {
@@ -73,8 +68,6 @@ html.dark-mode {
     --shadow-hover: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 30px rgba(0,0,0,0.4);
     
     --status-gray: #3a3a3c;
-    --btn-glass-bg: rgba(40, 40, 40, 0.7);
-    --btn-glass-border: rgba(255, 255, 255, 0.1);
 }
 
 /* Scrollbar */
@@ -95,9 +88,17 @@ body {
 
 /* Header */
 .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 6px; margin-bottom: 4px; }
-.brand-logo { font-weight: 900; font-size: 1.35rem; letter-spacing: -0.03em; color: var(--text-main); cursor: pointer; display: flex; align-items: center; gap: 2px; user-select: none; margin: 0; transition: opacity 0.2s; }
-.brand-logo:hover { opacity: 0.7; }
+
+/* Logo Optimization: Interactive Feedback */
+.brand-logo { 
+    font-weight: 900; font-size: 1.35rem; letter-spacing: -0.03em; color: var(--text-main); 
+    cursor: pointer; display: flex; align-items: center; gap: 2px; user-select: none; margin: 0; 
+    transition: opacity 0.2s, transform 0.2s; 
+}
+.brand-logo:hover { opacity: 0.7; transform: scale(1.02); }
+.brand-logo:active { transform: scale(0.95); }
 .brand-logo span { opacity: 0.4; font-weight: 400; font-size: 0.9em; margin: 0 1px; }
+
 .controls-group { display: flex; gap: 10px; }
 
 .btn-circle {
@@ -106,13 +107,42 @@ body {
 .btn-circle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .btn-circle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* Clean Hero Card (No Map) */
+/* Hero Card (Map Fused Background) */
 .hero-card {
-  background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-card); padding: 48px 30px; 
+  background: var(--bg-card); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); padding: 0; 
   display: flex; flex-direction: column; align-items: center; text-align: center;
-  position: relative; overflow: hidden; transition: box-shadow 0.4s ease, transform 0.4s ease;
+  position: relative; overflow: hidden;
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+  min-height: 340px; justify-content: center;
+  cursor: pointer; 
 }
-.hero-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.hero-card:hover { box-shadow: var(--shadow-hover); }
+.hero-card:hover .hero-map-bg { opacity: 0.35; transform: scale(1.03) translateY(0); }
+html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.5; }
+
+/* Map Background */
+.hero-map-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none; 
+    opacity: 0; 
+    transform: scale(1.15) translateY(40px); 
+    transition: opacity 1.2s ease-out, transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 25%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 25%, black 100%);
+    filter: grayscale(100%) contrast(1.05) brightness(1.05); 
+    will-change: transform, opacity; 
+}
+.hero-map-bg.loaded { opacity: 0.15; transform: scale(1) translateY(0); }
+html.dark-mode .hero-map-bg { filter: invert(95%) hue-rotate(180deg) grayscale(20%) contrast(1.1) brightness(0.8); }
+html.dark-mode .hero-map-bg.loaded { opacity: 0.3; }
+
+.hero-content {
+    position: relative; z-index: 2; padding: 48px 30px;
+    display: flex; flex-direction: column; align-items: center; width: 100%;
+    pointer-events: none; 
+}
+.hero-content > * { pointer-events: auto; } 
 
 .flag-container {
   width: 80px; height: 60px; border-radius: 16px; background: var(--bg-inner); margin-bottom: 24px;
@@ -147,47 +177,10 @@ body {
 .card-label { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; font-weight: 700; color: var(--text-label); text-transform: uppercase; letter-spacing: 0.05em; }
 .card-icon-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--bg-inner); border-radius: 10px; color: var(--text-main); transition: background 0.3s; }
 .card-icon-box svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
-.card-value { font-size: 0.95rem; font-weight: 600; color: var(--text-value); word-break: break-all; line-height: 1.5; margin-top: 2px; }
+.card-value { font-size: 0.95rem; font-weight: 600; color: var(--text-value); word-break: break-all; line-height: 1.5; margin-top: 2px; transition: color 0.2s; }
 .card-value.copied { color: var(--status-green) !important; }
 
-/* Map Card (Separate) */
-#mapCard { 
-    border: 0; padding: 0 !important; display: none; overflow: hidden; 
-    transition: all 0.3s ease; position: relative; background: var(--bg-inner);
-}
-#mapCard.visible { display: block; min-height: 320px; }
-
-#mapFrame {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
-    /* Soft filter for map */
-    filter: grayscale(100%) contrast(1.05) brightness(1.05); opacity: 0.8;
-    transition: filter 0.5s, opacity 0.5s; pointer-events: none; z-index: 0;
-}
-#mapCard:hover #mapFrame { pointer-events: auto; filter: grayscale(0%); opacity: 1; }
-html.dark-mode #mapFrame { filter: invert(90%) hue-rotate(180deg) grayscale(20%) contrast(1.2) brightness(0.8); }
-html.dark-mode #mapCard:hover #mapFrame { filter: invert(90%) hue-rotate(180deg) grayscale(0%) contrast(1.1) brightness(0.9); }
-
-.map-btn-link {
-  position: absolute; top: 20px; right: 20px; z-index: 10;
-  background: var(--btn-glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--btn-glass-border); color: var(--text-main);
-  padding: 10px 16px; border-radius: 99px; font-size: 0.8rem; font-weight: 700;
-  text-decoration: none; display: flex; align-items: center; gap: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s;
-}
-.map-btn-link:hover { transform: translateY(-2px); }
-
-.map-overlay-content { 
-    position: absolute; bottom: 0; left: 0; width: 100%; pointer-events: none; z-index: 2; padding: 20px;
-    background: linear-gradient(to top, var(--bg-card) 10%, rgba(0,0,0,0) 100%);
-}
-.map-info-group {
-    pointer-events: auto; display: inline-flex; flex-direction: column; gap: 4px;
-    background: var(--btn-glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    padding: 10px 16px; border-radius: 12px; border: 1px solid var(--btn-glass-border);
-}
-
-/* Lists */
+/* Lists & Connectivity */
 .network-list { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
 .network-item { display: flex; flex-direction: column; gap: 3px; }
 .network-label { font-size: 0.7rem; font-weight: 700; color: var(--text-label); opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -215,7 +208,15 @@ html.dark-mode #mapCard:hover #mapFrame { filter: invert(90%) hue-rotate(180deg)
 }
 .footer-link-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
 .footer-link-pill svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; }
-.copyright { font-size: 0.75rem; color: var(--text-dim); font-weight: 500; letter-spacing: 0.02em; }
+
+.footer-meta {
+    display: flex; gap: 16px; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--text-dim); font-weight: 500; letter-spacing: 0.02em;
+}
+/* New Footer Language Toggle */
+.footer-lang-toggle { cursor: pointer; color: var(--text-label); transition: color 0.2s; }
+.footer-lang-toggle:hover { color: var(--text-main); }
+
 .seo-text { max-width: 600px; text-align: center; color: var(--text-dim); font-size: 0.7rem; line-height: 1.6; opacity: 0.5; margin-top: 8px; }
 
 /* Toast */
@@ -245,8 +246,14 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 .fade-in { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@media (max-width: 768px) { .bento-grid { grid-template-columns: repeat(2, 1fr); } .span-1, .span-2, .col-full { grid-column: span 1; } .span-4 { grid-column: span 2; } }
-@media (max-width: 480px) { body { padding: 20px 16px; } .container { gap: 16px; } .hero-card { min-height: 280px; padding: 40px 20px; } .bento-grid { grid-template-columns: 1fr; } .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; } .brand-logo { font-size: 1.2rem; } }
+@media (max-width: 480px) {
+  body { padding: 20px 16px; } 
+  .hero-card { min-height: 280px; padding: 40px 20px; } 
+  .hero-map-bg { transform: scale(1.15) translateY(30px); -webkit-mask-image: linear-gradient(to bottom, transparent 20%, black 100%); }
+  .bento-grid { grid-template-columns: 1fr; } 
+  .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; } 
+  .brand-logo { font-size: 1.2rem; }
+}
 </style>
 </head>
 <body>
@@ -255,33 +262,34 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 
 <div class="container">
   <header class="header-bar">
-    <h1 class="brand-logo" onclick="location.reload()" title="Reload (Press R)">
+    <h1 class="brand-logo" onclick="location.reload()" title="Refresh">
         IP<span>.</span>WWZ<span>.</span>iM
     </h1>
+    
     <div class="controls-group">
-        <button id="shareBtn" class="btn-circle" title="Share Result" style="display:none;">
+        <button id="shareBtn" class="btn-circle" title="Share" style="display:none;">
             <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
         </button>
-        <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
-        <button id="themeToggle" class="btn-circle" title="Toggle Theme (Press D)">
+        <button id="themeToggle" class="btn-circle" title="Theme">
             <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        </button>
-        <button id="refreshBtn" class="btn-circle" title="Refresh Data">
-            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
         </button>
     </div>
   </header>
 
-  <div class="hero-card" id="heroCard">
-    <div class="flag-container">
-      <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
-      <img id="ip-flag" class="flag-img" alt="Flag">
-    </div>
-    <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
-    <div id="ipAddr" class="skeleton" onclick="copyText(this); event.stopPropagation();" style="min-width: 200px; height: 3.5rem;">Checking...</div>
-    <div class="location-pill">
-      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-      <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
+  <div class="hero-card" id="heroCard" title="Click to open map">
+    <iframe id="heroMapFrame" class="hero-map-bg" src="about:blank" loading="lazy"></iframe>
+    
+    <div class="hero-content">
+        <div class="flag-container">
+          <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
+          <img id="ip-flag" class="flag-img" alt="Flag">
+        </div>
+        <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
+        <div id="ipAddr" class="skeleton" onclick="copyText(this); event.stopPropagation();" style="min-width: 200px; height: 3.5rem;">Checking...</div>
+        <div class="location-pill">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
+        </div>
     </div>
   </div>
 
@@ -397,23 +405,6 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
         </div>
       </div>
     </div>
-
-    <div class="card span-4" id="mapCard">
-        <iframe id="mapFrame" src="about:blank" loading="lazy"></iframe>
-        <a id="mapLink" href="#" target="_blank" class="map-btn-link">
-           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-           <span data-zh="打开地图" data-en="Open Maps">Open Maps</span> 
-        </a>
-        <div class="map-overlay-content">
-             <div class="map-info-group">
-                <div class="card-label" style="margin-bottom:2px;">
-                    <span style="font-size:0.7rem; opacity:0.8;">COORDINATES</span>
-                </div>
-                <div id="coords" class="card-value skeleton" style="font-family:'Inter',monospace; font-size:1rem;"></div>
-            </div>
-        </div>
-    </div>
-
   </div>
 
   <footer class="footer">
@@ -421,10 +412,12 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
           <span>Visit WWZ.iM</span>
           <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <div class="copyright">© 2025 WWZ.iM. All Rights Reserved.</div>
+      <div class="footer-meta">
+          <span class="copyright">© 2025 WWZ.iM.</span>
+          <span id="langToggleFooter" class="footer-lang-toggle">English / 中文</span>
+      </div>
       <div class="seo-text">
           Free tool to check your <strong>Public IP Address</strong>, <strong>IPv6</strong>, <strong>ISP</strong>, and <strong>Geolocation</strong>. 
-          Test network latency and WebRTC leakage.
       </div>
   </footer>
 
@@ -435,16 +428,18 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #2c2c2e 25%, #3a3a
 </div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val'),secRow:document.getElementById('secondary-row'),
+heroCard: document.getElementById('heroCard'), heroMapFrame: document.getElementById('heroMapFrame'),
 toast: document.getElementById('toast'), toastMsg: document.getElementById('toastMsg'),
-shareBtn: document.getElementById('shareBtn'), offlineAlert: document.getElementById('offlineAlert')
+shareBtn: document.getElementById('shareBtn'), offlineAlert: document.getElementById('offlineAlert'),
+langToggleFooter: document.getElementById('langToggleFooter')
 };
 let lastIpv6='';
 let currentLang = 'en';
-let ipData = {};
+let mapUrl = ''; 
 let toastTimeout;
+let ipData = {};
 
-const langToggleBtn = document.getElementById('langToggle');
 const themeToggleBtn = document.getElementById('themeToggle');
 const themeIcon = themeToggleBtn.querySelector('svg');
 const htmlEl = document.documentElement;
@@ -454,7 +449,7 @@ const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
 const sunPath = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
 
-// 1. Shortcuts & JSON Copy
+// Shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
@@ -463,7 +458,6 @@ document.addEventListener('keydown', (e) => {
     if (k === 'j') copyText({innerText: JSON.stringify(ipData, null, 2)});
 });
 
-// 2. Network Status
 window.addEventListener('offline', () => { els.offlineAlert.classList.add('active'); });
 window.addEventListener('online', () => { 
     els.offlineAlert.classList.remove('active'); 
@@ -471,7 +465,6 @@ window.addEventListener('online', () => {
     checkLatency();
 });
 
-// 3. Share API
 if (navigator.share) {
     els.shareBtn.style.display = 'flex';
     els.shareBtn.addEventListener('click', async () => {
@@ -485,14 +478,9 @@ if (navigator.share) {
     });
 }
 
-document.getElementById('refreshBtn').addEventListener('click', () => {
-    localStorage.removeItem('ip_geo_cache');
-    location.reload();
-});
-
 function switchLang(lang){
   currentLang = lang;
-  langToggleBtn.textContent = lang === 'en' ? 'EN' : '中';
+  // Removed header button logic, added footer text update logic if needed
   document.querySelectorAll('[data-zh]').forEach(el=>{
     el.textContent = el.getAttribute(`data-${lang}`);
   });
@@ -506,7 +494,10 @@ function switchLang(lang){
   els.offlineAlert.textContent = lang === 'zh' ? '网络连接已断开' : 'No Internet Connection';
 }
 
-langToggleBtn.addEventListener('click', () => { switchLang(currentLang === 'en' ? 'zh' : 'en'); });
+// Bind Footer Language Toggle
+els.langToggleFooter.addEventListener('click', () => {
+    switchLang(currentLang === 'en' ? 'zh' : 'en');
+});
 
 function applyThemeUI(isDark) {
     if (isDark) { htmlEl.classList.add('dark-mode'); themeIcon.innerHTML = sunPath; } 
@@ -597,7 +588,6 @@ async function copyText(el){
   }
 }
 
-// Dynamic Favicon
 function updateFavicon() {
     if (!els.flag.src) return;
     const img = new Image();
@@ -660,20 +650,12 @@ async function getGeo(ip){
 }
 
 function renderCoords(lat, lon){
-  // Format coordinates
-  els.coords.textContent = `${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)}`;
-  rmSk(els.coords);
-
-  const mapUrl = currentLang === 'zh' 
-    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
-    : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-  els.mapLink.href = mapUrl;
-  
-  els.mapCard.classList.add('visible');
-  const delta = 0.05; 
-  // Delayed loading for smoothness
+  mapUrl = currentLang === 'zh' ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+  els.heroCard.onclick = () => window.open(mapUrl, '_blank');
+  const nLat = parseFloat(lat), nLon = parseFloat(lon), delta = 0.05; 
   requestAnimationFrame(() => {
-      els.mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-delta},${lat-delta},${parseFloat(lon)+delta},${parseFloat(lat)+delta}&layer=mapnik&marker=${lat},${lon}`;
+     els.heroMapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${nLon-delta},${nLat-delta},${nLon+delta},${nLat+delta}&layer=mapnik&marker=${nLat},${nLon}`;
+     els.heroMapFrame.onload = () => { els.heroMapFrame.classList.add('loaded'); };
   });
 }
 
@@ -712,13 +694,7 @@ function render(ip,geo){
   els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
   
   const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
-  // Handle Map Card Logic explicitly
-  if(lat && lon && !isNaN(lat) && !isNaN(lon)){ 
-      renderCoords(lat, lon); 
-  } else { 
-      els.mapCard.classList.remove('visible'); 
-      els.mapFrame.src = ''; 
-  }
+  if(lat && lon && !isNaN(lat) && !isNaN(lon)){ renderCoords(lat, lon); }
   
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
