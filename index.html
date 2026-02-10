@@ -106,37 +106,51 @@ body {
   position: relative;
   overflow: hidden; 
   transition: box-shadow 0.3s, background 0.3s, transform 0.2s;
-  min-height: 360px; /* 稍微增加高度，给地图更多展示空间 */
+  min-height: 360px;
   justify-content: center;
-  cursor: pointer; /* 整个卡片可点击 */
+  cursor: pointer;
 }
 
+/* 悬停交互：地图轻微放大并变清晰 */
 .hero-card:hover .hero-map-bg { 
-    opacity: 0.3; /* 悬停时稍微加深，暗示交互 */
-    transform: scale(1.02); /* 微微放大 */
+    /* 保持 visible 状态下的 transform，并叠加一点点缩放 */
+    opacity: 0.4; 
+    transform: scale(1.05) translateY(0); 
 }
-html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.5; }
+html.dark-mode .hero-card:hover .hero-map-bg { opacity: 0.6; }
 
-/* 背景地图层 */
+/* 背景地图层 - 动画核心 */
 .hero-map-bg {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     z-index: 0;
     pointer-events: none; 
-    opacity: 0; 
-    transition: opacity 0.8s ease, transform 0.8s ease;
     
-    /* 核心修改：使用 Mask 实现“上半部分不显示，下半部分渐变显示” */
+    /* 初始状态：完全透明，放大，且向下偏移（沉在下面） */
+    opacity: 0; 
+    transform: scale(1.2) translateY(60px); 
+    
+    /* 动画定义：使用 cubic-bezier 制造丝滑的“刹车”感 */
+    transition: 
+        opacity 1.5s ease-out, 
+        transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    /* Mask 遮罩：上虚下实 */
     -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
     mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
     
-    /* 浅色模式地图滤镜：素描感 */
+    /* 浅色模式地图滤镜 */
     filter: grayscale(100%) contrast(1.1) brightness(1.1);
+    will-change: transform, opacity; /* 性能优化 */
 }
-.hero-map-bg.loaded { opacity: 0.2; } /* 默认淡一点，不抢视觉 */
+
+/* 加载完成状态：回归正常位置，显示出来 */
+.hero-map-bg.loaded { 
+    opacity: 0.2; 
+    transform: scale(1) translateY(0); 
+}
 
 html.dark-mode .hero-map-bg {
-    /* 暗黑模式：反色 + 深蓝冷色调 */
     filter: invert(90%) hue-rotate(180deg) grayscale(20%) contrast(1.2) brightness(0.8);
 }
 html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
@@ -150,10 +164,8 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
     flex-direction: column;
     align-items: center;
     width: 100%;
-    pointer-events: none; /* 让点击穿透到卡片背景 */
+    pointer-events: none; 
 }
-
-/* 恢复内部交互元素的点击 */
 .hero-content > * { pointer-events: auto; }
 
 .flag-container {
@@ -167,7 +179,7 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
   z-index: 2;
   transition: transform 0.3s;
 }
-.hero-card:hover .flag-container { transform: translateY(-2px); }
+.hero-card:hover .flag-container { transform: translateY(-3px); }
 
 .flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
 .flag-img.loaded { opacity: 1; }
@@ -179,7 +191,7 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
   color: var(--text-label);
   text-transform: uppercase;
   margin-bottom: 12px;
-  background: var(--bg-card); /* 确保文字背景干净 */
+  background: var(--bg-card); 
   padding: 4px 8px;
   border-radius: 4px;
 }
@@ -193,8 +205,6 @@ html.dark-mode .hero-map-bg.loaded { opacity: 0.4; }
   letter-spacing: -0.04em;
   cursor: pointer; 
   transition: opacity 0.2s, color 0.3s;
-  /* 移除阴影，因为背景现在是纯净的 */
-  text-shadow: none;
 }
 #ipAddr:active { opacity: 0.6; }
 
@@ -347,6 +357,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 
   <div class="hero-card" id="heroCard">
     <iframe id="heroMapFrame" class="hero-map-bg" src="about:blank" loading="lazy"></iframe>
+    
     <div class="hero-content">
         <div class="flag-container">
           <div id="flagSkeleton" class="skeleton" style="width:100%; height:100%"></div>
