@@ -6,45 +6,53 @@
 <title>IP Insight | Monochrome</title>
 <link rel="preconnect" href="https://api.ipify.org">
 <link rel="preconnect" href="https://ipwho.is">
-<link rel="preconnect" href="https://ipapi.co">
-<link rel="preconnect" href="https://flagcdn.com">
 <link rel="preconnect" href="https://dns.google">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23000%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 fill=%22%23fff%22 text-anchor=%22middle%22 dy=%22.35em%22>IP</text></svg>">
 
 <style>
 /* --- 极致黑白视觉系统 (Monochrome) --- */
 :root {
-  /* 白天模式：纯净白/灰/黑 */
-  --bg-body: #ffffff;
-  --bg-card: #f9f9f9;
-  --bg-inner: #eeeeee;
+  --bg-body: #f2f3f5;
+  --bg-card: #ffffff;
+  --bg-inner: #f7f9fc;
+  
   --text-main: #000000;
   --text-label: #666666;
   --text-value: #111111;
+  --text-dim: #999999;
   
   --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
   
   --radius: 20px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --map-filter: grayscale(100%) contrast(1.2);
+  --map-opacity: 0.6;
+  
+  /* 状态颜色 */
+  --status-green: #10b981;
+  --status-yellow: #f59e0b;
+  --status-red: #ef4444;
+  --status-gray: #e5e7eb;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* 夜间模式：纯黑/深灰/白 */
-    --bg-body: #000000;      /* 纯黑背景 */
-    --bg-card: #111111;      /* 极深灰卡片 */
-    --bg-inner: #222222;     /* 炭灰内部容器 */
-    --text-main: #ffffff;    /* 纯白文字 */
-    --text-label: #888888;   /* 中灰标签 */
-    --text-value: #f0f0f0;   /* 亮灰数值 */
+html.dark-mode {
+    --bg-body: #0a0a0a;
+    --bg-card: #141414;
+    --bg-inner: #1f1f1f;
+    --text-main: #ffffff;
+    --text-label: #888888;
+    --text-value: #f5f5f5;
+    --text-dim: #555555;
     
-    /* 夜间模式改用细微白边框代替阴影，增强轮廓感 */
-    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.15);
-    --shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.4);
-  }
+    --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    --shadow-hover: 0 0 0 1px rgba(255, 255, 255, 0.3);
+    
+    --map-filter: grayscale(100%) invert(100%) contrast(1.1) brightness(0.8);
+    --map-opacity: 0.5;
+    
+    --status-gray: #333333;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -56,7 +64,7 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding: 30px 16px; 
+  padding: 40px 16px; 
   transition: background 0.3s, color 0.3s;
 }
 
@@ -72,13 +80,13 @@ body {
 .controls-header {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: -4px;
+  gap: 12px;
+  margin-bottom: 4px;
   z-index: 10;
 }
 .btn-circle {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  width: 40px; height: 40px;
+  border-radius: 50%; 
   background: var(--bg-card);
   color: var(--text-main);
   border: none;
@@ -86,94 +94,99 @@ body {
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700;
-  font-size: 0.8rem;
-  transition: all 0.2s;
+  font-size: 0.85rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-circle:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-.btn-circle.active { background: var(--text-main); color: var(--bg-body); box-shadow: none; }
+.btn-circle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* --- Hero Card --- */
 .hero-card {
   background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
-  padding: 40px 30px; 
+  padding: 48px 30px; 
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.3s;
+  transition: box-shadow 0.3s, background 0.3s;
 }
 
 .flag-container {
-  width: 80px; height: 60px;
+  width: 88px; height: 66px;
   border-radius: 12px;
   background: var(--bg-inner);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
+  transition: background 0.3s;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 .flag-img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; }
 .flag-img.loaded { opacity: 1; }
 
 .label-sup {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--text-label);
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 #ipAddr {
-  font-size: clamp(2.2rem, 5vw, 3.5rem); 
+  font-size: clamp(2.5rem, 6vw, 4rem); 
   font-weight: 800;
   color: var(--text-main);
-  line-height: 1.1;
-  margin-bottom: 16px;
-  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 20px;
+  letter-spacing: -0.04em;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, color 0.3s;
 }
-#ipAddr:active { opacity: 0.5; }
+#ipAddr:active { opacity: 0.6; }
 
 .location-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   background: var(--bg-inner);
-  padding: 8px 20px;
+  padding: 10px 24px;
   border-radius: 99px;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-value);
+  transition: background 0.3s, color 0.3s;
 }
+.location-pill svg { width: 16px; height: 16px; fill: currentColor; }
 
 /* --- Bento Grid --- */
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
+  grid-auto-flow: dense; 
 }
 
 .card {
   background: var(--bg-card);
   border-radius: 20px;
   box-shadow: var(--shadow-card);
-  padding: 24px 20px; /* 稍微增加上下内边距以平衡视觉 */
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 内容垂直居中 */
+  justify-content: center;
   gap: 8px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  min-height: 100px; /* 确保最小高度统一 */
+  min-height: 110px;
 }
-.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
 .card:active { transform: scale(0.98); }
 
 .info-row { display: flex; flex-direction: column; gap: 8px; }
@@ -182,60 +195,92 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-label);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-/* 图标背景统一 */
-.card-label i {
-  width: 26px; height: 26px;
+/* Icons */
+.card-icon-box {
+  width: 28px; height: 28px;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg-inner);
-  border-radius: 7px;
-  font-size: 0.85rem;
+  border-radius: 8px;
   color: var(--text-main);
+  transition: background 0.3s, color 0.3s;
 }
+.card-icon-box svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
 
 .card-value {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-value);
   word-break: break-all;
-  line-height: 1.4;
-  margin-top: 4px; /* 增加一点与标签的间距 */
+  line-height: 1.5;
+  margin-top: 4px;
+  transition: color 0.2s;
 }
+.card-value.dim { color: var(--text-dim); font-weight: 500; }
+.card-value.copied { color: var(--status-green) !important; }
 
-/* value-bar 已删除 */
-
+/* Layout Helpers */
+.span-1 { grid-column: span 1; }
 .span-2 { grid-column: span 2; }
-.col-full { grid-column: span 2; }
-.sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.span-4 { grid-column: span 4; }
 
-/* 地图按钮 - 黑白反差风格 */
+/* Connectivity List */
+.latency-list { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 5px; }
+.latency-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 600; }
+.latency-name { display: flex; align-items: center; gap: 8px; color: var(--text-label); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--status-gray); transition: background 0.3s; }
+.status-dot.pulse { animation: pulse 2s infinite; }
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.latency-ms { font-family: 'Inter', monospace; color: var(--text-value); opacity: 0.9; }
+
+/* Map Card Logic */
+#mapCard { 
+    border: 0; padding: 0 !important; 
+    transition: all 0.3s ease;
+    display: none; 
+}
+#mapCard.visible { 
+    display: flex; 
+    min-height: 260px; 
+}
+#mapFrame {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
+    filter: var(--map-filter); opacity: var(--map-opacity);
+    transition: filter 0.5s, opacity 0.5s; pointer-events: none; z-index: 0;
+}
+#mapCard:hover #mapFrame { pointer-events: auto; filter: grayscale(0%); opacity: 1; }
+.map-overlay-content { 
+    position: relative; z-index: 2; width: 100%; height: 100%; 
+    padding: 24px; 
+    background: linear-gradient(180deg, var(--bg-card) 0%, rgba(255,255,255,0) 100%); 
+}
+html.dark-mode .map-overlay-content { background: linear-gradient(180deg, var(--bg-card) 0%, rgba(0,0,0,0) 100%); }
+
 .map-btn-link {
   color: var(--text-main);
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-inner);
-  padding: 8px 14px;
-  border-radius: 8px;
-  margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-card); 
+  padding: 10px 16px; border-radius: 10px; margin-top: 8px;
   transition: all 0.2s;
-  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: fit-content;
 }
-.map-btn-link:hover { 
-  background: var(--text-main); 
-  color: var(--bg-body); 
-}
+.map-btn-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
 
-/* Skeleton Loading - Monochrome */
+/* Skeleton */
 .skeleton {
   background: linear-gradient(90deg, var(--bg-inner) 25%, rgba(128,128,128,0.1) 50%, var(--bg-inner) 75%);
   background-size: 200% 100%;
@@ -244,47 +289,32 @@ body {
   border-radius: 6px;
   min-height: 1.2em;
 }
-@media (prefers-color-scheme: dark) {
-  .skeleton { 
-    background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); 
-  }
-}
+html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%, #222 75%); }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-/* Toast */
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.9);
-  background: var(--text-main); color: var(--bg-body);
-  padding: 10px 24px; border-radius: 99px;
-  font-weight: 600; font-size: 0.85rem;
-  opacity: 0; visibility: hidden; transition: 0.3s;
-  display: flex; gap: 8px; align-items: center; 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  z-index: 100;
-}
-.toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
-
-/* Responsive */
 @media (max-width: 768px) {
   .bento-grid { grid-template-columns: repeat(2, 1fr); }
-  .span-2, .col-full { grid-column: span 2; }
+  .span-1, .span-2, .col-full { grid-column: span 1; } 
+  .span-4 { grid-column: span 2; }
 }
 @media (max-width: 480px) {
   .hero-card { padding: 30px 20px; }
   .bento-grid { grid-template-columns: 1fr; }
-  .span-2, .col-full { grid-column: span 1; }
-  .sub-grid { gap: 16px; }
+  .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-  
   <div class="controls-header">
-    <button class="btn-circle active lang-btn" data-lang="en">EN</button>
-    <button class="btn-circle lang-btn" data-lang="zh">中</button>
-    <button id="refreshBtn" class="btn-circle"><i class="fa-solid fa-rotate-right"></i></button>
+    <button id="langToggle" class="btn-circle" title="Switch Language">EN</button>
+    <button id="themeToggle" class="btn-circle" title="Toggle Theme">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <button id="refreshBtn" class="btn-circle" title="Refresh">
+        <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
   </div>
 
   <div class="hero-card">
@@ -294,103 +324,294 @@ body {
     </div>
     <div class="label-sup" data-zh="公网 IP 地址" data-en="Public IP Address">Public IP Address</div>
     <div id="ipAddr" class="skeleton" onclick="copyText(this)" style="min-width: 200px; height: 3.5rem;"></div>
-    
     <div class="location-pill">
-      <i class="fa-solid fa-location-dot"></i>
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
       <div id="ipPlace" class="skeleton" style="min-width: 100px; height: 1.2em;"></div>
     </div>
   </div>
 
   <div class="bento-grid">
-    
-    
-    <div class="card span-2" onclick="copyText(document.getElementById('hostname'))">
+
+    <div class="card span-2" id="card_hostname" onclick="copyText(document.getElementById('hostname'))">
       <div class="info-row">
-        <div class="card-label"><i class="fa-solid fa-server"></i> <span data-zh="主机名" data-en="Hostname">Hostname</span></div>
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg></div>
+            <span data-zh="主机名" data-en="Hostname">Hostname</span>
+        </div>
         <div id="hostname" class="card-value skeleton"></div>
       </div>
     </div>
-    <div class="card span-2" onclick="copyText(document.getElementById('ipv6'))">
+
+    <div class="card span-2" id="card_ipv6" onclick="copyText(document.getElementById('ipv6'))">
       <div class="info-row">
-        <div class="card-label"><i class="fa-brands fa-connectdevelop"></i> <span data-zh="IPv6 地址" data-en="IPv6 Address">IPv6 Address</span></div>
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg></div>
+            <span data-zh="IPv6 地址" data-en="IPv6 Address">IPv6 Address</span>
+        </div>
         <div id="ipv6" class="card-value skeleton"></div>
       </div>
     </div>
 
-    <div class="sub-grid col-full">
-      <div class="card" onclick="copyText(document.getElementById('country'))">
-        <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
+    <div class="card span-2" id="card_connectivity" onclick="refreshLatency()">
+      <div class="info-row" style="gap:12px;">
+        <div class="card-label">
+             <div class="card-icon-box"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg></div>
+             <span data-zh="网络连通性" data-en="Connectivity">Connectivity</span>
+        </div>
+        <div class="latency-list">
+            <div class="latency-item">
+                <div class="latency-name"><div class="status-dot" id="dot-google"></div>Google</div>
+                <div class="latency-ms" id="lat-google">-- ms</div>
+            </div>
+            <div class="latency-item">
+                <div class="latency-name"><div class="status-dot" id="dot-github"></div>GitHub</div>
+                <div class="latency-ms" id="lat-github">-- ms</div>
+            </div>
+            <div class="latency-item">
+                <div class="latency-name"><div class="status-dot" id="dot-cf"></div>Cloudflare</div>
+                <div class="latency-ms" id="lat-cf">-- ms</div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card span-2" id="card_org" onclick="copyText(document.getElementById('org'))">
+      <div class="info-row">
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M17 21v-8H7v8"></path></svg></div>
+            <span data-zh="运营商 / 组织" data-en="ISP / Organization">ISP / Organization</span>
+        </div>
+        <div id="org" class="card-value skeleton"></div>
+      </div>
+    </div>
+
+    <div class="card span-1" id="card_country" onclick="copyText(document.getElementById('country'))">
+      <div class="info-row">
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></div>
+            <span data-zh="国家" data-en="Country">Country</span>
+        </div>
         <div id="country" class="card-value skeleton"></div>
       </div>
-      <div class="card" onclick="copyText(document.getElementById('continent'))">
-        <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
+    </div>
+
+    <div class="card span-1" id="card_continent" onclick="copyText(document.getElementById('continent'))">
+      <div class="info-row">
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
+            <span data-zh="大洲" data-en="Continent">Continent</span>
+        </div>
         <div id="continent" class="card-value skeleton"></div>
       </div>
     </div>
 
-    
-
-    <div class="card col-full" onclick="copyText(document.getElementById('org'))">
+    <div class="card span-2" id="card_ua" onclick="copyText(document.getElementById('uaInfo'))">
       <div class="info-row">
-        <div class="card-label"><i class="fa-solid fa-building"></i> <span data-zh="运营商 / 组织" data-en="ISP / Organization">ISP / Organization</span></div>
-        <div id="org" class="card-value skeleton"></div>
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <span data-zh="设备信息" data-en="Device Info">Device Info</span>
+        </div>
+        <div id="uaInfo" class="card-value" style="font-size:0.85rem; line-height:1.5;">Detecting...</div>
       </div>
     </div>
-    
 
-    <div class="sub-grid col-full">
-      <div class="card" onclick="copyText(document.getElementById('asn'))">
-        <div class="card-label"><i class="fa-solid fa-fingerprint"></i> <span data-zh="ASN" data-en="ASN">ASN</span></div>
+    <div class="card span-1" id="card_asn" onclick="copyText(document.getElementById('asn'))">
+      <div class="info-row">
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"></path></svg></div>
+            <span data-zh="ASN" data-en="ASN">ASN</span>
+        </div>
         <div id="asn" class="card-value skeleton"></div>
       </div>
-      <div class="card" onclick="copyText(document.getElementById('postal'))">
-        <div class="card-label"><i class="fa-solid fa-map-pin"></i> <span data-zh="邮编" data-en="Postal Code">Postal Code</span></div>
+    </div>
+
+    <div class="card span-1" id="card_postal" onclick="copyText(document.getElementById('postal'))">
+      <div class="info-row">
+        <div class="card-label">
+            <div class="card-icon-box"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
+            <span data-zh="邮编" data-en="Postal Code">Postal Code</span>
+        </div>
         <div id="postal" class="card-value skeleton"></div>
       </div>
     </div>
 
-    <div class="card col-full">
-      <div class="info-row">
-        <div class="card-label"><i class="fa-solid fa-compass"></i> <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span></div>
-        <div id="coords" class="card-value skeleton"></div>
-      </div>
-      <div id="mapContainer" style="margin-top: 8px;"></div>
+    <div class="card span-4" id="mapCard">
+        <iframe id="mapFrame" src=""></iframe>
+        <div class="map-overlay-content">
+             <div class="info-row">
+                <div class="card-label">
+                    <div class="card-icon-box"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg></div>
+                    <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span>
+                </div>
+                <div id="coords" class="card-value skeleton" style="margin-bottom: 8px;"></div>
+                <a id="mapLink" href="#" target="_blank" class="map-btn-link">
+                   <svg viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                   <span data-zh="打开地图" data-en="Open Maps">Open Maps</span> 
+                </a>
+            </div>
+        </div>
     </div>
 
   </div>
 </div>
 
-<div id="toast" class="toast"><i class="fa-solid fa-check-circle"></i> <span id="toastMsg">Copied</span></div>
-
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),mapBox:document.getElementById('mapContainer'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),toast:document.getElementById('toast'),toastMsg:document.getElementById('toastMsg')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo')};
 let lastIpv6='';
 let currentLang = 'en';
+
+const langToggleBtn = document.getElementById('langToggle');
+const themeToggleBtn = document.getElementById('themeToggle');
+const themeIcon = themeToggleBtn.querySelector('svg');
+const htmlEl = document.documentElement;
+const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+// Icons paths
+const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+const sunPath = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
 
 document.getElementById('refreshBtn').addEventListener('click', () => {
     localStorage.removeItem('ip_geo_cache');
     location.reload();
 });
 
-const langBtns = document.querySelectorAll('.lang-btn');
 function switchLang(lang){
   currentLang = lang;
+  langToggleBtn.textContent = lang === 'en' ? 'EN' : '中';
   document.querySelectorAll('[data-zh]').forEach(el=>{
     el.textContent = el.getAttribute(`data-${lang}`);
   });
-  langBtns.forEach(btn=>btn.classList.toggle('active',btn.dataset.lang===lang));
-  els.toastMsg.textContent = lang === 'zh' ? '已复制' : 'Copied';
-  if(els.coords.dataset.lat){ renderCoords(els.coords.dataset.lat, els.coords.dataset.lon); }
+  localStorage.setItem('lang', lang);
+  
+  // Refresh visibility check
+  const v6 = els.ipv6.textContent;
+  updateCardVisibility('card_ipv6', v6);
+  updateCardVisibility('card_country', els.country.textContent);
+  updateCardVisibility('card_asn', els.asn.textContent);
+  updateCardVisibility('card_continent', els.continent.textContent);
+  updateCardVisibility('card_postal', els.postal.textContent);
 }
-langBtns.forEach(btn=>btn.addEventListener('click',()=>switchLang(btn.dataset.lang)));
+
+langToggleBtn.addEventListener('click', () => {
+    switchLang(currentLang === 'en' ? 'zh' : 'en');
+});
+
+function applyThemeUI(isDark) {
+    if (isDark) {
+        htmlEl.classList.add('dark-mode');
+        themeIcon.innerHTML = sunPath;
+    } else {
+        htmlEl.classList.remove('dark-mode');
+        themeIcon.innerHTML = moonPath;
+    }
+}
+
+function initTheme() {
+    applyThemeUI(systemDarkQuery.matches);
+    systemDarkQuery.addEventListener('change', (e) => applyThemeUI(e.matches));
+}
+
+themeToggleBtn.addEventListener('click', () => {
+    applyThemeUI(!htmlEl.classList.contains('dark-mode'));
+});
+
+// --- Connectivity Test with Auto Refresh ---
+const sites = [
+    { id: 'google', url: 'https://www.google.com/favicon.ico' },
+    { id: 'github', url: 'https://github.com/favicon.ico' },
+    { id: 'cf', url: 'https://www.cloudflare.com/favicon.ico' }
+];
+
+let latencyInterval;
+
+async function checkLatency() {
+    sites.forEach(async (site) => {
+        const start = performance.now();
+        const dot = document.getElementById(`dot-${site.id}`);
+        const txt = document.getElementById(`lat-${site.id}`);
+        
+        // Reset state slightly for visual feedback
+        txt.style.opacity = '0.5';
+        
+        try {
+            await fetch(site.url, { mode: 'no-cors', cache: 'no-store' });
+            const duration = Math.round(performance.now() - start);
+            txt.textContent = `${duration} ms`;
+            txt.style.opacity = '1';
+            
+            // Remove old classes
+            dot.classList.remove('pulse');
+            
+            if(duration < 200) { 
+                dot.style.background = 'var(--status-green)'; 
+            } else if(duration < 500) { 
+                dot.style.background = 'var(--status-yellow)'; 
+            } else { 
+                dot.style.background = 'var(--status-red)'; 
+            }
+            
+            // Trigger a small pulse animation
+            void dot.offsetWidth; // trigger reflow
+            dot.classList.add('pulse');
+            
+        } catch (e) {
+            txt.textContent = 'Error';
+            txt.style.opacity = '1';
+            dot.style.background = 'var(--status-red)';
+        }
+    });
+}
+
+// [优化] 手动刷新函数
+function refreshLatency() {
+    // 1. 清除旧定时器
+    clearInterval(latencyInterval);
+    
+    // 2. 视觉反馈：显示加载中
+    sites.forEach(site => {
+        document.getElementById(`lat-${site.id}`).textContent = '...';
+        document.getElementById(`dot-${site.id}`).style.background = 'var(--status-gray)';
+    });
+
+    // 3. 立即执行一次
+    checkLatency();
+    
+    // 4. 重启定时器
+    latencyInterval = setInterval(checkLatency, 3000);
+}
+
+// --- Browser Info ---
+function getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let browser = "Unknown";
+    if(ua.includes("Edg")) browser = "Edge";
+    else if(ua.includes("Chrome")) browser = "Chrome";
+    else if(ua.includes("Firefox")) browser = "Firefox";
+    else if(ua.includes("Safari")) browser = "Safari";
+    
+    let os = "Unknown OS";
+    if (ua.indexOf("Win")!=-1) os="Windows";
+    else if (ua.indexOf("Mac")!=-1) os="MacOS";
+    else if (ua.indexOf("X11")!=-1) os="UNIX";
+    else if (ua.indexOf("Linux")!=-1) os="Linux";
+    else if (ua.indexOf("Android")!=-1) os="Android";
+    else if (ua.indexOf("iPhone")!=-1) os="iOS";
+
+    const screenRes = `${window.screen.width} x ${window.screen.height}`;
+    els.uaInfo.innerHTML = `${browser} on ${os}<br><span style="color:var(--text-label);font-size:0.8em">Screen: ${screenRes}</span>`;
+}
 
 async function copyText(el){
   const text = el.innerText.trim();
-  if(text && text !== 'Unknown' && text !== 'Not Detected' && text !== 'N/A'){
-    try{ await navigator.clipboard.writeText(text); showToast(); } catch{}
+  if(text && text!=='Unknown'&&text!=='Not Detected'&&text!=='N/A'){
+    try{ 
+        await navigator.clipboard.writeText(text); 
+        const originalColor = el.style.color;
+        el.classList.add('copied');
+        setTimeout(() => el.classList.remove('copied'), 600);
+    } catch{}
   }
 }
-function showToast(){els.toast.classList.add('show');setTimeout(()=>els.toast.classList.remove('show'),2000)}
 function rmSk(el){el.classList.remove('skeleton')}
 function showFlag(){els.flagSk.style.display='none';els.flag.classList.add('loaded')}
 
@@ -420,12 +641,22 @@ async function getGeo(ip){
 }
 
 function renderCoords(lat, lon){
-  const mapUrl = currentLang === 'zh' 
-    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=位置` 
-    : `https://www.google.com/maps?q=${lat},${lon}`;
   els.coords.textContent = `${lat}, ${lon}`;
-  els.mapBox.innerHTML = `<a href="${mapUrl}" target="_blank" class="map-btn-link">Open Map <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`;
-  els.coords.dataset.lat = lat; els.coords.dataset.lon = lon;
+  const mapUrl = currentLang === 'zh' 
+    ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
+    : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+  els.mapLink.href = mapUrl;
+  
+  els.mapCard.classList.add('visible');
+  
+  const delta = 0.05; 
+  els.mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-delta},${lat-delta},${parseFloat(lon)+delta},${parseFloat(lat)+delta}&layer=mapnik&marker=${lat},${lon}`;
+}
+
+function updateCardVisibility(id, value) {
+    const el = document.getElementById(id);
+    const shouldHide = !value || value === 'Unknown' || value === '未知' || value === 'Not Detected' || value === '未检测到';
+    if (shouldHide) { el.style.display = 'none'; } else { el.style.display = 'flex'; }
 }
 
 function render(ip,geo){
@@ -436,21 +667,45 @@ function render(ip,geo){
   let code=(geo.country_code||geo.country||'').toLowerCase();
   if(code.length===2){els.flag.src=`https://flagcdn.com/w160/${code}.png`;els.flag.onload=showFlag;if(els.flag.complete&&els.flag.naturalWidth)showFlag()}else{els.flagSk.style.display='none'}
   [els.hostname,els.country,els.asn,els.org,els.continent,els.coords,els.postal,els.ipv6].forEach(rmSk);
-  els.ipv6.textContent=geo.ipv6||lastIpv6|| (currentLang==='zh'?'未检测到':'Not Detected');
+  
+  const v6 = geo.ipv6||lastIpv6;
+  if(v6 && v6!=='Not Detected') { els.ipv6.textContent=v6; } else { els.ipv6.textContent=currentLang==='zh'?'未检测到':'Not Detected'; }
+  updateCardVisibility('card_ipv6', els.ipv6.textContent);
+
   els.country.textContent=geo.country_name||geo.country|| (currentLang==='zh'?'未知':'Unknown');
+  updateCardVisibility('card_country', els.country.textContent);
+
   const asnNum=geo.connection?.asn||geo.asn||'';
   els.asn.textContent=asnNum?(currentLang==='zh'?`AS${asnNum}`:`AS${asnNum}`): (currentLang==='zh'?'未知':'Unknown');
-  els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
+  updateCardVisibility('card_asn', els.asn.textContent);
+
   els.continent.textContent=geo.continent_name||geo.continent|| (currentLang==='zh'?'未知':'Unknown');
-  const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
-  if(lat&&lon){renderCoords(lat, lon);}else{els.coords.textContent=currentLang==='zh'?'未知':'Unknown';}
+  updateCardVisibility('card_continent', els.continent.textContent);
+
   els.postal.textContent=geo.postal||geo.postal_code|| (currentLang==='zh'?'未知':'Unknown');
+  updateCardVisibility('card_postal', els.postal.textContent);
+
+  els.org.textContent=geo.org||geo.connection?.isp||geo.isp|| (currentLang==='zh'?'未知':'Unknown');
+
+  const lat=geo.latitude||geo.lat,lon=geo.longitude||geo.lon;
+  if(lat && lon && !isNaN(lat) && !isNaN(lon)){ renderCoords(lat, lon); } else { els.mapCard.classList.remove('visible'); els.mapFrame.src = ''; }
+
   fetchHostname(geo.ip||geo.query||'').then(h=>els.hostname.textContent=h|| (currentLang==='zh'?'未检测到':'Not Detected'));
 }
 
 async function fetchHostname(ip){if(!ip)return currentLang==='zh'?'未检测到':'Not Detected';try{const r=await fetch(`https://dns.google/resolve?name=${ip.split('.').reverse().join('.')}.in-addr.arpa&type=PTR`);const d=await r.json();return d.Answer?.[0]?.data?.replace(/\.$/,'')|| (currentLang==='zh'?'未检测到':'Not Detected')}catch{return currentLang==='zh'?'未检测到':'Not Detected'}}
 
 async function start(){
+  localStorage.removeItem('theme');
+  initTheme();
+  getBrowserInfo();
+  
+  // [优化] 初始化时启动定时器
+  checkLatency(); 
+  latencyInterval = setInterval(checkLatency, 3000);
+
+  const savedLang = localStorage.getItem('lang');
+  if (savedLang) { switchLang(savedLang); } else { switchLang('en'); }
   const {ipv4,ipv6}=await getIPs();
   const primary=ipv4!=='Unknown'?ipv4:(ipv6.includes('Not Detected')?'Unknown':ipv6);
   els.ipAddr.textContent=primary;rmSk(els.ipAddr);els.ipv6.textContent=ipv6;
