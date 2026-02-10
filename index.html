@@ -35,6 +35,12 @@
   --status-yellow: #f59e0b;
   --status-red: #ef4444;
   --status-gray: #e5e7eb;
+
+  /* 磨砂玻璃按钮变量 (Light Mode) */
+  --btn-glass-bg: rgba(255, 255, 255, 0.6);
+  --btn-glass-border: rgba(0, 0, 0, 0.08);
+  --btn-glass-hover: rgba(255, 255, 255, 0.85);
+  --glass-blur: 16px;
 }
 
 html.dark-mode {
@@ -53,6 +59,11 @@ html.dark-mode {
     --map-opacity: 0.5;
     
     --status-gray: #333333;
+
+    /* 磨砂玻璃按钮变量 (Dark Mode) */
+    --btn-glass-bg: rgba(40, 40, 40, 0.6);
+    --btn-glass-border: rgba(255, 255, 255, 0.1);
+    --btn-glass-hover: rgba(60, 60, 60, 0.85);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -225,7 +236,6 @@ body {
 .card-value.dim { color: var(--text-dim); font-weight: 500; }
 .card-value.copied { color: var(--status-green) !important; }
 
-/* [新增] 专门用于 Network 卡片的列表样式 */
 .network-list {
   display: flex; flex-direction: column; gap: 12px; margin-top: 6px;
 }
@@ -262,10 +272,12 @@ body {
     border: 0; padding: 0 !important; 
     transition: all 0.3s ease;
     display: none; 
+    overflow: hidden;
 }
 #mapCard.visible { 
-    display: flex; 
-    min-height: 260px; 
+    display: block; 
+    min-height: 280px; 
+    position: relative;
 }
 #mapFrame {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;
@@ -273,26 +285,48 @@ body {
     transition: filter 0.5s, opacity 0.5s; pointer-events: none; z-index: 0;
 }
 #mapCard:hover #mapFrame { pointer-events: auto; filter: grayscale(0%); opacity: 1; }
+
 .map-overlay-content { 
     position: relative; z-index: 2; width: 100%; height: 100%; 
     padding: 24px; 
-    background: linear-gradient(180deg, var(--bg-card) 0%, rgba(255,255,255,0) 100%); 
+    background: linear-gradient(180deg, var(--bg-card) 30%, rgba(255,255,255,0) 100%); 
+    pointer-events: none; 
 }
-html.dark-mode .map-overlay-content { background: linear-gradient(180deg, var(--bg-card) 0%, rgba(0,0,0,0) 100%); }
+html.dark-mode .map-overlay-content { background: linear-gradient(180deg, var(--bg-card) 30%, rgba(0,0,0,0) 100%); }
+
+.map-info-group {
+    pointer-events: auto;
+    display: inline-flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-card);
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+}
 
 .map-btn-link {
+  position: absolute;
+  top: 24px; right: 24px; z-index: 10;
+  background: var(--btn-glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--btn-glass-border);
   color: var(--text-main);
   text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--bg-card); 
-  padding: 10px 16px; border-radius: 10px; margin-top: 8px;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  width: fit-content;
+  font-size: 0.85rem; font-weight: 700;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-radius: 14px; 
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  pointer-events: auto;
 }
-.map-btn-link:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.map-btn-link:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    background: var(--btn-glass-hover); 
+}
+.map-btn-link svg { width: 16px; height: 16px; stroke-width: 2.5; }
 
 /* Skeleton */
 .skeleton {
@@ -315,6 +349,8 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
   .hero-card { padding: 30px 20px; }
   .bento-grid { grid-template-columns: 1fr; }
   .span-1, .span-2, .col-full, .span-4 { grid-column: span 1; }
+  .map-btn-link { top: 16px; right: 16px; padding: 10px 14px; font-size: 0.8rem; }
+  .map-info-group { padding: 10px 14px; }
 }
 </style>
 </head>
@@ -357,9 +393,9 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
                 <div class="network-label" data-zh="主机名" data-en="Hostname">Hostname</div>
                 <div id="hostname" class="network-val skeleton"></div>
             </div>
-            <div class="network-item" onclick="copyText(document.getElementById('localip'))" style="cursor:pointer">
-                <div class="network-label" data-zh="局域网 IP" data-en="LAN IP">LAN IP</div>
-                <div id="localip" class="network-val">...</div>
+            <div class="network-item" id="secondary-row" style="cursor:pointer">
+                <div class="network-label" id="sec-label">...</div>
+                <div id="sec-val" class="network-val">...</div>
             </div>
         </div>
       </div>
@@ -460,17 +496,19 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 
     <div class="card span-4" id="mapCard">
         <iframe id="mapFrame" src=""></iframe>
+        
+        <a id="mapLink" href="#" target="_blank" class="map-btn-link">
+           <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+           <span data-zh="打开地图" data-en="Open Maps">Open Maps</span> 
+        </a>
+
         <div class="map-overlay-content">
-             <div class="info-row">
+             <div class="map-info-group">
                 <div class="card-label">
                     <div class="card-icon-box"><svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg></div>
                     <span data-zh="地理坐标" data-en="Coordinates">Coordinates</span>
                 </div>
-                <div id="coords" class="card-value skeleton" style="margin-bottom: 8px;"></div>
-                <a id="mapLink" href="#" target="_blank" class="map-btn-link">
-                   <svg viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                   <span data-zh="打开地图" data-en="Open Maps">Open Maps</span> 
-                </a>
+                <div id="coords" class="card-value skeleton"></div>
             </div>
         </div>
     </div>
@@ -479,7 +517,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 </div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo'),localip:document.getElementById('localip')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo'),secLabel:document.getElementById('sec-label'),secVal:document.getElementById('sec-val')};
 let lastIpv6='';
 let currentLang = 'en';
 
@@ -506,12 +544,21 @@ function switchLang(lang){
   });
   localStorage.setItem('lang', lang);
   
-  // Refresh visibility check
+  // Refresh visibility & labels
   updateCardVisibility('card_ipv6', els.ipv6.textContent);
   updateCardVisibility('card_country', els.country.textContent);
   updateCardVisibility('card_asn', els.asn.textContent);
   updateCardVisibility('card_continent', els.continent.textContent);
   updateCardVisibility('card_postal', els.postal.textContent);
+  
+  // Refresh Network Card Secondary Row Label
+  if(els.secLabel.dataset.type === 'lan') {
+      els.secLabel.textContent = lang === 'zh' ? '局域网 IP' : 'LAN IP';
+  } else if(els.secLabel.dataset.type === 'net') {
+      els.secLabel.textContent = lang === 'zh' ? '网络类型' : 'Network Type';
+  } else {
+      els.secLabel.textContent = lang === 'zh' ? '系统语言' : 'System Lang';
+  }
 }
 
 langToggleBtn.addEventListener('click', () => {
@@ -537,50 +584,30 @@ themeToggleBtn.addEventListener('click', () => {
     applyThemeUI(!htmlEl.classList.contains('dark-mode'));
 });
 
-// --- Connectivity Test with Auto Refresh ---
-const sites = [
-    { id: 'google', url: 'https://www.google.com/favicon.ico' },
-    { id: 'github', url: 'https://github.com/favicon.ico' },
-    { id: 'cf', url: 'https://www.cloudflare.com/favicon.ico' }
-];
-
+// --- Connectivity ---
+const sites = [{ id: 'google', url: 'https://www.google.com/favicon.ico' }, { id: 'github', url: 'https://github.com/favicon.ico' }, { id: 'cf', url: 'https://www.cloudflare.com/favicon.ico' }];
 let latencyInterval;
-
 async function checkLatency() {
     sites.forEach(async (site) => {
         const start = performance.now();
         const dot = document.getElementById(`dot-${site.id}`);
         const txt = document.getElementById(`lat-${site.id}`);
-        
         txt.style.opacity = '0.5';
-        
         try {
             await fetch(site.url, { mode: 'no-cors', cache: 'no-store' });
             const duration = Math.round(performance.now() - start);
             txt.textContent = `${duration} ms`;
             txt.style.opacity = '1';
-            
             dot.classList.remove('pulse');
-            
-            if(duration < 200) { 
-                dot.style.background = 'var(--status-green)'; 
-            } else if(duration < 500) { 
-                dot.style.background = 'var(--status-yellow)'; 
-            } else { 
-                dot.style.background = 'var(--status-red)'; 
-            }
-            
-            void dot.offsetWidth; 
-            dot.classList.add('pulse');
-            
+            if(duration < 200) { dot.style.background = 'var(--status-green)'; } 
+            else if(duration < 500) { dot.style.background = 'var(--status-yellow)'; } 
+            else { dot.style.background = 'var(--status-red)'; }
+            void dot.offsetWidth; dot.classList.add('pulse');
         } catch (e) {
-            txt.textContent = 'Error';
-            txt.style.opacity = '1';
-            dot.style.background = 'var(--status-red)';
+            txt.textContent = 'Error'; txt.style.opacity = '1'; dot.style.background = 'var(--status-red)';
         }
     });
 }
-
 function refreshLatency() {
     clearInterval(latencyInterval);
     sites.forEach(site => {
@@ -599,7 +626,6 @@ function getBrowserInfo() {
     else if(ua.includes("Chrome")) browser = "Chrome";
     else if(ua.includes("Firefox")) browser = "Firefox";
     else if(ua.includes("Safari")) browser = "Safari";
-    
     let os = "Unknown OS";
     if (ua.indexOf("Win")!=-1) os="Windows";
     else if (ua.indexOf("Mac")!=-1) os="MacOS";
@@ -607,12 +633,11 @@ function getBrowserInfo() {
     else if (ua.indexOf("Linux")!=-1) os="Linux";
     else if (ua.indexOf("Android")!=-1) os="Android";
     else if (ua.indexOf("iPhone")!=-1) os="iOS";
-
     const screenRes = `${window.screen.width} x ${window.screen.height}`;
     els.uaInfo.innerHTML = `${browser} on ${os}<br><span style="color:var(--text-label);font-size:0.8em">Screen: ${screenRes}</span>`;
 }
 
-// --- Local IP (WebRTC) ---
+// --- Network Row Logic (LAN IP -> Network Type -> Lang) ---
 async function getLocalIP() {
   return new Promise((resolve) => {
     try {
@@ -622,16 +647,42 @@ async function getLocalIP() {
       pc.onicecandidate = (ice) => {
         if (ice && ice.candidate && ice.candidate.candidate) {
            const result = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(ice.candidate.candidate);
-           if(result) {
-               resolve(result[1]);
-               pc.close();
-           }
+           if(result) { resolve(result[1]); pc.close(); }
         }
       };
-      setTimeout(() => { resolve(null); if(pc) pc.close(); }, 1500);
+      setTimeout(() => { resolve(null); if(pc) pc.close(); }, 1000);
     } catch(e) { resolve(null); }
   });
 }
+
+async function initNetworkCard() {
+    // 1. Try LAN IP
+    const localIP = await getLocalIP();
+    if(localIP) {
+        els.secLabel.dataset.type = 'lan';
+        els.secLabel.textContent = currentLang === 'zh' ? '局域网 IP' : 'LAN IP';
+        els.secVal.textContent = localIP;
+        document.getElementById('secondary-row').onclick = () => copyText(els.secVal);
+        return;
+    }
+
+    // 2. Fallback: Network Type
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if(conn && conn.effectiveType) {
+        els.secLabel.dataset.type = 'net';
+        els.secLabel.textContent = currentLang === 'zh' ? '网络类型' : 'Network Type';
+        els.secVal.textContent = `${conn.effectiveType.toUpperCase()} ${conn.downlink ? '('+conn.downlink+'Mbps)' : ''}`;
+        document.getElementById('secondary-row').onclick = null; // No copy for type
+        return;
+    }
+
+    // 3. Last Resort: System Language
+    els.secLabel.dataset.type = 'lang';
+    els.secLabel.textContent = currentLang === 'zh' ? '系统语言' : 'System Lang';
+    els.secVal.textContent = navigator.language;
+    document.getElementById('secondary-row').onclick = null;
+}
+
 
 async function copyText(el){
   const text = el.innerText.trim();
@@ -678,9 +729,7 @@ function renderCoords(lat, lon){
     ? `https://uri.amap.com/marker?position=${lon},${lat}&name=Location` 
     : `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
   els.mapLink.href = mapUrl;
-  
   els.mapCard.classList.add('visible');
-  
   const delta = 0.05; 
   els.mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-delta},${lat-delta},${parseFloat(lon)+delta},${parseFloat(lat)+delta}&layer=mapnik&marker=${lat},${lon}`;
 }
@@ -731,14 +780,9 @@ async function start(){
   localStorage.removeItem('theme');
   initTheme();
   getBrowserInfo();
-  
   checkLatency(); 
   latencyInterval = setInterval(checkLatency, 3000);
-
-  // [新增] 检测局域网 IP
-  getLocalIP().then(ip => {
-      els.localip.textContent = ip || (currentLang==='zh'?'无法获取':'N/A');
-  });
+  initNetworkCard();
 
   const savedLang = localStorage.getItem('lang');
   if (savedLang) { switchLang(savedLang); } else { switchLang('en'); }
