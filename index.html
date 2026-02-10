@@ -303,6 +303,13 @@ body {
 
   <div class="bento-grid">
     
+    
+    <div class="card span-2" onclick="copyText(document.getElementById('hostname'))">
+      <div class="info-row">
+        <div class="card-label"><i class="fa-solid fa-server"></i> <span data-zh="主机名" data-en="Hostname">Hostname</span></div>
+        <div id="hostname" class="card-value skeleton"></div>
+      </div>
+    </div>
     <div class="card span-2" onclick="copyText(document.getElementById('ipv6'))">
       <div class="info-row">
         <div class="card-label"><i class="fa-brands fa-connectdevelop"></i> <span data-zh="IPv6 地址" data-en="IPv6 Address">IPv6 Address</span></div>
@@ -310,12 +317,18 @@ body {
       </div>
     </div>
 
-    <div class="card span-2" onclick="copyText(document.getElementById('hostname'))">
-      <div class="info-row">
-        <div class="card-label"><i class="fa-solid fa-server"></i> <span data-zh="主机名" data-en="Hostname">Hostname</span></div>
-        <div id="hostname" class="card-value skeleton"></div>
+    <div class="sub-grid col-full">
+      <div class="card" onclick="copyText(document.getElementById('country'))">
+        <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
+        <div id="country" class="card-value skeleton"></div>
+      </div>
+      <div class="card" onclick="copyText(document.getElementById('continent'))">
+        <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
+        <div id="continent" class="card-value skeleton"></div>
       </div>
     </div>
+
+    
 
     <div class="card col-full" onclick="copyText(document.getElementById('org'))">
       <div class="info-row">
@@ -323,22 +336,12 @@ body {
         <div id="org" class="card-value skeleton"></div>
       </div>
     </div>
+    
 
     <div class="sub-grid col-full">
       <div class="card" onclick="copyText(document.getElementById('asn'))">
         <div class="card-label"><i class="fa-solid fa-fingerprint"></i> <span data-zh="ASN" data-en="ASN">ASN</span></div>
         <div id="asn" class="card-value skeleton"></div>
-      </div>
-      <div class="card" onclick="copyText(document.getElementById('country'))">
-        <div class="card-label"><i class="fa-regular fa-flag"></i> <span data-zh="国家" data-en="Country">Country</span></div>
-        <div id="country" class="card-value skeleton"></div>
-      </div>
-    </div>
-
-    <div class="sub-grid col-full">
-      <div class="card" onclick="copyText(document.getElementById('continent'))">
-        <div class="card-label"><i class="fa-solid fa-earth-americas"></i> <span data-zh="大洲" data-en="Continent">Continent</span></div>
-        <div id="continent" class="card-value skeleton"></div>
       </div>
       <div class="card" onclick="copyText(document.getElementById('postal'))">
         <div class="card-label"><i class="fa-solid fa-map-pin"></i> <span data-zh="邮编" data-en="Postal Code">Postal Code</span></div>
