@@ -225,6 +225,20 @@ body {
 .card-value.dim { color: var(--text-dim); font-weight: 500; }
 .card-value.copied { color: var(--status-green) !important; }
 
+/* [新增] 专门用于 Network 卡片的列表样式 */
+.network-list {
+  display: flex; flex-direction: column; gap: 12px; margin-top: 6px;
+}
+.network-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.network-label {
+  font-size: 0.7rem; font-weight: 700; color: var(--text-label); opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.network-val {
+  font-size: 0.95rem; font-weight: 600; color: var(--text-value); font-family: 'Inter', monospace;
+}
+
 /* Layout Helpers */
 .span-1 { grid-column: span 1; }
 .span-2 { grid-column: span 2; }
@@ -332,13 +346,22 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 
   <div class="bento-grid">
 
-    <div class="card span-2" id="card_hostname" onclick="copyText(document.getElementById('hostname'))">
+    <div class="card span-2" id="card_network">
       <div class="info-row">
         <div class="card-label">
             <div class="card-icon-box"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg></div>
-            <span data-zh="主机名" data-en="Hostname">Hostname</span>
+            <span data-zh="网络信息" data-en="Network Info">Network Info</span>
         </div>
-        <div id="hostname" class="card-value skeleton"></div>
+        <div class="network-list">
+            <div class="network-item" onclick="copyText(document.getElementById('hostname'))" style="cursor:pointer">
+                <div class="network-label" data-zh="主机名" data-en="Hostname">Hostname</div>
+                <div id="hostname" class="network-val skeleton"></div>
+            </div>
+            <div class="network-item" onclick="copyText(document.getElementById('localip'))" style="cursor:pointer">
+                <div class="network-label" data-zh="局域网 IP" data-en="LAN IP">LAN IP</div>
+                <div id="localip" class="network-val">...</div>
+            </div>
+        </div>
       </div>
     </div>
 
@@ -456,7 +479,7 @@ html.dark-mode .skeleton { background: linear-gradient(90deg, #222 25%, #333 50%
 </div>
 
 <script>
-const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo')};
+const els={ipAddr:document.getElementById('ipAddr'),ipPlace:document.getElementById('ipPlace'),ipv6:document.getElementById('ipv6'),hostname:document.getElementById('hostname'),country:document.getElementById('country'),asn:document.getElementById('asn'),org:document.getElementById('org'),continent:document.getElementById('continent'),coords:document.getElementById('coords'),postal:document.getElementById('postal'),flag:document.getElementById('ip-flag'),flagSk:document.getElementById('flagSkeleton'),mapFrame:document.getElementById('mapFrame'),mapLink:document.getElementById('mapLink'),mapCard:document.getElementById('mapCard'),uaInfo:document.getElementById('uaInfo'),localip:document.getElementById('localip')};
 let lastIpv6='';
 let currentLang = 'en';
 
@@ -484,8 +507,7 @@ function switchLang(lang){
   localStorage.setItem('lang', lang);
   
   // Refresh visibility check
-  const v6 = els.ipv6.textContent;
-  updateCardVisibility('card_ipv6', v6);
+  updateCardVisibility('card_ipv6', els.ipv6.textContent);
   updateCardVisibility('card_country', els.country.textContent);
   updateCardVisibility('card_asn', els.asn.textContent);
   updateCardVisibility('card_continent', els.continent.textContent);
@@ -530,7 +552,6 @@ async function checkLatency() {
         const dot = document.getElementById(`dot-${site.id}`);
         const txt = document.getElementById(`lat-${site.id}`);
         
-        // Reset state slightly for visual feedback
         txt.style.opacity = '0.5';
         
         try {
@@ -539,7 +560,6 @@ async function checkLatency() {
             txt.textContent = `${duration} ms`;
             txt.style.opacity = '1';
             
-            // Remove old classes
             dot.classList.remove('pulse');
             
             if(duration < 200) { 
@@ -550,8 +570,7 @@ async function checkLatency() {
                 dot.style.background = 'var(--status-red)'; 
             }
             
-            // Trigger a small pulse animation
-            void dot.offsetWidth; // trigger reflow
+            void dot.offsetWidth; 
             dot.classList.add('pulse');
             
         } catch (e) {
@@ -562,21 +581,13 @@ async function checkLatency() {
     });
 }
 
-// [优化] 手动刷新函数
 function refreshLatency() {
-    // 1. 清除旧定时器
     clearInterval(latencyInterval);
-    
-    // 2. 视觉反馈：显示加载中
     sites.forEach(site => {
         document.getElementById(`lat-${site.id}`).textContent = '...';
         document.getElementById(`dot-${site.id}`).style.background = 'var(--status-gray)';
     });
-
-    // 3. 立即执行一次
     checkLatency();
-    
-    // 4. 重启定时器
     latencyInterval = setInterval(checkLatency, 3000);
 }
 
@@ -601,9 +612,30 @@ function getBrowserInfo() {
     els.uaInfo.innerHTML = `${browser} on ${os}<br><span style="color:var(--text-label);font-size:0.8em">Screen: ${screenRes}</span>`;
 }
 
+// --- Local IP (WebRTC) ---
+async function getLocalIP() {
+  return new Promise((resolve) => {
+    try {
+      const pc = new RTCPeerConnection({iceServers: []});
+      pc.createDataChannel('');
+      pc.createOffer().then(o => pc.setLocalDescription(o));
+      pc.onicecandidate = (ice) => {
+        if (ice && ice.candidate && ice.candidate.candidate) {
+           const result = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(ice.candidate.candidate);
+           if(result) {
+               resolve(result[1]);
+               pc.close();
+           }
+        }
+      };
+      setTimeout(() => { resolve(null); if(pc) pc.close(); }, 1500);
+    } catch(e) { resolve(null); }
+  });
+}
+
 async function copyText(el){
   const text = el.innerText.trim();
-  if(text && text!=='Unknown'&&text!=='Not Detected'&&text!=='N/A'){
+  if(text && text!=='Unknown'&&text!=='Not Detected'&&text!=='N/A'&&text!=='...'){
     try{ 
         await navigator.clipboard.writeText(text); 
         const originalColor = el.style.color;
@@ -700,9 +732,13 @@ async function start(){
   initTheme();
   getBrowserInfo();
   
-  // [优化] 初始化时启动定时器
   checkLatency(); 
   latencyInterval = setInterval(checkLatency, 3000);
+
+  // [新增] 检测局域网 IP
+  getLocalIP().then(ip => {
+      els.localip.textContent = ip || (currentLang==='zh'?'无法获取':'N/A');
+  });
 
   const savedLang = localStorage.getItem('lang');
   if (savedLang) { switchLang(savedLang); } else { switchLang('en'); }
